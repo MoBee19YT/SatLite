@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>High-Performance Satellite Tracker with NORAD Search</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.4/satellite.min.js"></script>
+    <style>
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: monospace; }
+        #map { width: 100vw; height: 100vh; background: #000; }
+        #status { position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid #00ffff; color: #00ffff; border-radius: 8px; font-size: 13px; pointer-events: none; }
+        #controls { position: absolute; top: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.85); padding: 15px; border: 1px solid #00ffff; border-radius: 8px; font-size: 12px; max-height: 85vh; overflow-y: auto; width: 240px; }
+        #controls label { display: block; margin-bottom: 8px; cursor: pointer; }
+        #controls input[type="checkbox"] { cursor: pointer; margin-right: 8px; }
+        #search-box { width: 100%; box-sizing: border-box; background: #111; border: 1px solid #00ffff; color: #fff; padding: 6px; font-family: monospace; border-radius: 4px; margin-bottom: 6px; }
+        #search-hint { font-size: 10px; color: #888; margin-bottom: 8px; display: block; }
+        #search-btn { width: 100%; background: #00ffff; color: #000; border: none; padding: 6px; font-family: monospace; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 15px; }
+        #search-btn:hover { background: #00cccc; }
+    </style>
+</head>
+<body>
+
+    <div id="status">SELECT A CATEGORY TO BEGIN...</div>
+    <div id="controls">
+        <b>SEARCH SATELLITE:</b><br><br>
+        <input type="text" id="search-box" placeholder="Name or NORAD ID (e.g. 25544)">
+        <span id="search-hint">Search by Name or NORAD ID</span>
+        <button id="search-btn">FIND SATELLITE</button>
+
+        <b>CATEGORIES:</b><br><br>
+        <label><input type="checkbox" value="stations" class="cat-box"> Space Stations</label>
+        <label><input type="checkbox" value="visual" class="cat-box"> Brightest / Visual</label>
+        <label><input type="checkbox" value="starlink" class="cat-box"> Starlink</label>
+        <label><input type="checkbox" value="weather" class="cat-box"> Weather & Earth</label>
+        <label><input type="checkbox" value="active" class="cat-box" style="border-top: 1px dashed #00ffff; padding-top: 8px;"> 🌐 All Active Satellites</label>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        const canvasRenderer = L.canvas({ padding: 0.5 });
+
+        const map = L.map('map', { 
+            attributionControl: false,
+            worldCopyJump: true,
+            maxBounds: [[-90, -Infinity], [90, Infinity]],
+            maxBoundsViscosity: 1.0,
+            renderer: canvasRenderer
+        }).setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            maxZoom: 18,
+            minZoom: 2,
+            noWrap: false,
+            renderer: canvasRenderer
+        }).addTo(map);
+
+        const statusDiv = document.getElementById('status');
+        
+        let allTrackers = [];
+        let nameToTracker = new Map();
+        let selectedTracker = null;
+        let orbitLayers = [];
+        let trajectoryEndTime = 0;
+
+        const WORKER_URL = 'https://satellite-proxy.aaaaadamobe19.workers.dev';
+
+        document.querySelectorAll('.cat-box').forEach(box => {
+            box.addEventListener('change', async (e) => {
+                const groupName = e.target.value;
+                if (e.target.checked) {
+                    await loadCategory(groupName);
+                } else {
+                    unloadCategory(groupName);
+                }
+                updateStatusText();
+            });
+        });
+
+        // Enhanced Search Engine Supporting Names & NORAD IDs
+        document.getElementById('search-btn').addEventListener('click', executeSearch);
+        document.getElementById('search-box').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') executeSearch();
+        });
+
+        function executeSearch() {
+            const query = document.getElementById('search-box').value.trim().toUpperCase();
+            if (!query) return;
+
+            let found = null;
+            for (let tracker of allTrackers) {
+                // Match either by name or by exact NORAD ID contained in line 2 of TLE data
+                if (tracker.name.toUpperCase().includes(query) || tracker.noradId === query) {
+                    found = tracker;
+                    break;
+                }
+            }
+
+            if (found) {
+                selectedTracker = found;
+                map.setView([found.lat, found.lng], Math.max(map.getZoom(), 4));
+                showTrajectory(found);
+                statusDiv.innerText = `FOUND: ${found.name} (NORAD: ${found.noradId})`;
+            } else {
+                statusDiv.innerText = `SATELLITE NOT FOUND (LOAD CATEGORY FIRST)`;
+            }
+        }
+
+        async function loadCategory(groupName) {
+            statusDiv.innerText = `FETCHING ${groupName.toUpperCase()}...`;
+            try {
+                const res = await fetch(`${WORKER_URL}?group=${groupName}`);
+                if (!res.ok) throw new Error('Worker fetch failed');
+                
+                const text = await res.text();
+                parseAndAddCategory(text, groupName);
+            } catch (err) {
+                console.warn(`Failed to fetch ${groupName}`, err);
+                statusDiv.innerText = `ERROR LOADING ${groupName.toUpperCase()}`;
+            }
+        }
+
+        function parseAndAddCategory(data, groupName) {
+            const lines = data.trim().split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            for (let i = 0; i < lines.length - 2; i += 3) {
+                const name = lines[i];
+                const line1 = lines[i + 1];
+                const line2 = lines[i + 2];
+
+                if (!(line1 && line2 && line1.startsWith('1 ') && line2.startsWith('2 '))) continue;
+
+                // Extract NORAD catalog ID from Line 2 (characters 3 to 7)
+                const noradId = line2.substring(2, 7).trim();
+
+                if (nameToTracker.has(name)) {
+                    nameToTracker.get(name).categories.add(groupName);
+                    continue;
+                }
+
+                try {
+                    const satrec = satellite.twoline2satrec(line1, line2);
+                    
+                    const marker = L.circleMarker([0, 0], {
+                        radius: 2.5,
+                        color: '#00ffff',
+                        fillColor: '#ffffff',
+                        fillOpacity: 0.8,
+                        weight: 1,
+                        renderer: canvasRenderer
+                    });
+
+                    const tracker = {
+                        name: name,
+                        noradId: noradId,
+                        categories: new Set([groupName]),
+                        satrec: satrec,
+                        marker: marker,
+                        isVisible: false,
+                        lat: 0,
+                        lng: 0
+                    };
+
+                    marker.on('click', (e) => {
+                        selectSatellite(e, tracker);
+                    });
+
+                    allTrackers.push(tracker);
+                    nameToTracker.set(name, tracker);
+                } catch (e) {}
+            }
+            updateStatusText();
+        }
+
+        function unloadCategory(groupName) {
+            for (let i = allTrackers.length - 1; i >= 0; i--) {
+                const tracker = allTrackers[i];
+                if (!tracker.categories.has(groupName)) continue;
+
+                tracker.categories.delete(groupName);
+
+                if (tracker.categories.size === 0) {
+                    if (selectedTracker === tracker) {
+                        clearTrajectory();
+                    }
+                    if (tracker.isVisible) {
+                        map.removeLayer(tracker.marker);
+                    }
+                    allTrackers.splice(i, 1);
+                    nameToTracker.delete(tracker.name);
+                }
+            }
+            updateStatusText();
+        }
+
+        function updateStatusText() {
+            if (allTrackers.length === 0) {
+                statusDiv.innerText = "SELECT A CATEGORY TO BEGIN...";
+            } else {
+                statusDiv.innerText = `READY: TRACKING ${allTrackers.length} SATELLITES`;
+            }
+        }
+
+        function selectSatellite(e, tracker) {
+            L.DomEvent.stopPropagation(e);
+            selectedTracker = tracker;
+            showTrajectory(tracker);
+        }
+
+        function showTrajectory(tracker) {
+            clearTrajectory();
+            const nowMs = Date.now();
+            const oneOrbitDuration = 93 * 60 * 1000;
+            trajectoryEndTime = nowMs + oneOrbitDuration;
+            const step = 60 * 1000;
+
+            let currentSegment = [];
+            const allSegments = [];
+
+            for (let time = nowMs; time <= trajectoryEndTime; time += step) {
+                const dateObj = new Date(time);
+                const gmst = satellite.gstime(dateObj);
+                const pv = satellite.propagate(tracker.satrec, dateObj);
+
+                if (pv.position) {
+                    const geo = satellite.eciToGeodetic(pv.position, gmst);
+                    let lng = satellite.degreesLong(geo.longitude);
+                    const lat = satellite.degreesLat(geo.latitude);
+
+                    if (currentSegment.length > 0) {
+                        const prevLng = currentSegment[currentSegment.length - 1][1];
+                        if (Math.abs(lng - prevLng) > 180) {
+                            allSegments.push(currentSegment);
+                            currentSegment = [];
+                        }
+                    }
+                    currentSegment.push([lat, lng]);
+                }
+            }
+            if (currentSegment.length > 0) allSegments.push(currentSegment);
+
+            allSegments.forEach(seg => {
+                const polyline = L.polyline(seg, { color: '#ff00ff', weight: 2, opacity: 0.8 }).addTo(map);
+                orbitLayers.push(polyline);
+            });
+
+            statusDiv.innerText = `SHOWING: ${tracker.name} [NORAD: ${tracker.noradId}]`;
+        }
+
+        function clearTrajectory() {
+            orbitLayers.forEach(layer => map.removeLayer(layer));
+            orbitLayers = [];
+            selectedTracker = null;
+            updateStatusText();
+        }
+
+        function startMasterAnimationLoop() {
+            let frameCount = 0;
+            function loop() {
+                frameCount++;
+                if (frameCount % 3 === 0 && allTrackers.length > 0) {
+                    const now = new Date();
+                    const nowMs = now.getTime();
+                    const gmst = satellite.gstime(now);
+                    const currentZoom = map.getZoom();
+                    const bounds = map.getBounds();
+
+                    let skipFactor = 1;
+                    if (currentZoom <= 2 && allTrackers.length > 2000) skipFactor = 4;
+                    else if (currentZoom === 3 && allTrackers.length > 2000) skipFactor = 2;
+
+                    for (let i = 0; i < allTrackers.length; i++) {
+                        const tracker = allTrackers[i];
+                        
+                        if (i % skipFactor !== 0) {
+                            if (tracker.isVisible) {
+                                map.removeLayer(tracker.marker);
+                                tracker.isVisible = false;
+                            }
+                            continue;
+                        }
+
+                        const pv = satellite.propagate(tracker.satrec, now);
+                        if (pv.position) {
+                            const geo = satellite.eciToGeodetic(pv.position, gmst);
+                            const lat = satellite.degreesLat(geo.latitude);
+                            const lng = satellite.degreesLong(geo.longitude);
+                            
+                            tracker.lat = lat;
+                            tracker.lng = lng;
+                            const latLng = [lat, lng];
+
+                            const isInsideScreen = bounds.contains(latLng);
+
+                            if (isInsideScreen || tracker === selectedTracker) {
+                                tracker.marker.setLatLng(latLng);
+                                if (!tracker.isVisible) {
+                                    tracker.marker.addTo(map);
+                                    tracker.isVisible = true;
+                                }
+                            } else {
+                                if (tracker.isVisible) {
+                                    map.removeLayer(tracker.marker);
+                                    tracker.isVisible = false;
+                                }
+                            }
+                        }
+                    }
+
+                    if (selectedTracker && nowMs >= trajectoryEndTime) {
+                        showTrajectory(selectedTracker);
+                    }
+                }
+                requestAnimationFrame(loop);
+            }
+            requestAnimationFrame(loop);
+        }
+
+        map.on('click', () => clearTrajectory());
+        startMasterAnimationLoop();
+    </script>
+</body>
+</html>
