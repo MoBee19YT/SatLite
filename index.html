@@ -2,36 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Performance Satellite Tracker with User Location & Advanced Passes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>High-Performance Satellite Tracker</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.4/satellite.min.js"></script>
     <style>
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: monospace; }
-        #map { width: 100vw; height: 100vh; background: #000; }
-        #status { position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid #00ffff; color: #00ffff; border-radius: 8px; font-size: 13px; pointer-events: none; }
-        #controls { position: absolute; top: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.85); padding: 15px; border: 1px solid #00ffff; border-radius: 8px; font-size: 12px; max-height: 85vh; overflow-y: auto; width: 260px; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: monospace; overflow: hidden; }
+        #map { width: 100vw; height: 100vh; background: #000; transition: transform 0.3s ease; }
+        
+        #status { 
+            position: absolute; 
+            top: 20px; 
+            left: 20px; 
+            z-index: 1000; 
+            background: rgba(0,0,0,0.8); 
+            padding: 10px 20px; 
+            border: 1px solid #00ffff; 
+            color: #00ffff; 
+            border-radius: 8px; 
+            font-size: 13px; 
+            pointer-events: none; 
+        }
+
+        #controls { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            z-index: 1000; 
+            background: rgba(0,0,0,0.85); 
+            padding: 15px; 
+            border: 1px solid #00ffff; 
+            border-radius: 8px; 
+            font-size: 12px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            width: 260px; 
+            box-sizing: border-box;
+        }
+
         #controls label { display: block; margin-bottom: 8px; cursor: pointer; }
         #controls input[type="checkbox"] { cursor: pointer; margin-right: 8px; }
+        
         #search-box { width: 100%; box-sizing: border-box; background: #111; border: 1px solid #00ffff; color: #fff; padding: 6px; font-family: monospace; border-radius: 4px; margin-bottom: 6px; }
         #search-hint { font-size: 10px; color: #888; margin-bottom: 8px; display: block; }
+        
         .action-btn { width: 100%; background: #00ffff; color: #000; border: none; padding: 6px; font-family: monospace; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 12px; }
         .action-btn:hover { background: #00cccc; }
         .section-divider { border-top: 1px dashed #00ffff; margin: 12px 0; padding-top: 8px; }
 
+        #mobile-menu-toggle { display: none; }
+
         /* Modal Styles */
-        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
-        .modal-content { background: #111; border: 1px solid #00ffff; padding: 20px; border-radius: 8px; width: 320px; color: #fff; max-height: 90vh; overflow-y: auto; }
+        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .modal-content { background: #111; border: 1px solid #00ffff; padding: 20px; border-radius: 8px; width: 320px; color: #fff; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         .modal-content h3 { color: #00ffff; margin-top: 0; }
         .modal-content label { display: block; margin-bottom: 6px; cursor: pointer; font-size: 11px; }
         .modal-content button { width: 100%; background: #00ffff; color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; margin-top: 5px; }
         .close-modal { background: #ff0055 !important; color: #fff !important; }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 768px) {
+            #status { top: 10px; left: 10px; right: 10px; font-size: 11px; text-align: center; }
+            #mobile-menu-toggle { display: block; position: fixed; bottom: 20px; right: 20px; z-index: 2000; width: 55px; height: 55px; border-radius: 50%; background: #00ffff; color: #000; border: none; font-size: 22px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,255,255,0.4); }
+            
+            #controls { 
+                top: auto; 
+                bottom: -100%; 
+                right: 0; 
+                left: 0; 
+                width: 100%; 
+                max-height: 55vh; 
+                border-radius: 12px 12px 0 0; 
+                transition: bottom 0.3s ease-in-out; 
+                padding: 20px; 
+            }
+            #controls.mobile-open { 
+                bottom: 0; 
+            }
+            body.menu-shifted #map { 
+                transform: translateY(-160px); 
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="status">INITIALIZING TRACKER...</div>
     
+    <button id="mobile-menu-toggle">⚙️</button>
+
     <!-- Notification Setup Modal Popup -->
     <div id="notif-modal">
         <div class="modal-content">
@@ -119,7 +178,6 @@
         let trajectoryEndTime = 0;
         let userMarker = null;
 
-        // Automatic Geolocation Detection & Red Dot Marker Placement
         let userLat = null;
         let userLng = null;
 
@@ -144,7 +202,6 @@
             if (userMarker) {
                 map.removeLayer(userMarker);
             }
-            // Distinct red dot indicator for user position
             userMarker = L.circleMarker([lat, lng], {
                 radius: 6,
                 color: '#ffffff',
@@ -154,7 +211,17 @@
             }).addTo(map).bindPopup("<b>Your Location</b>");
         }
 
-        // Notification Settings configuration
+        // Mobile Menu Toggle Logic & Screen Shift
+        const menuToggleBtn = document.getElementById('mobile-menu-toggle');
+        const controlsPanel = document.getElementById('controls');
+        
+        menuToggleBtn.addEventListener('click', () => {
+            const isOpen = controlsPanel.classList.toggle('mobile-open');
+            document.body.classList.toggle('menu-shifted', isOpen);
+            menuToggleBtn.innerText = isOpen ? '✕' : '⚙️';
+            setTimeout(() => { map.invalidateSize(); }, 300);
+        });
+
         let notificationSettings = {
             enabled: false,
             categories: new Set(['stations']),
@@ -162,7 +229,6 @@
             allowNight: true
         };
 
-        // Modal Elements Control
         const modal = document.getElementById('notif-modal');
         document.getElementById('open-notif-modal').addEventListener('click', () => {
             modal.style.display = 'flex';
@@ -188,7 +254,7 @@
             notificationSettings.enabled = true;
 
             modal.style.display = 'none';
-            statusDiv.innerText = `NOTIFICATIONS ACTIVE (${notificationSettings.categories.size} categories selected)`;
+            statusDiv.innerText = `NOTIFICATIONS ACTIVE (${notificationSettings.categories.size} categories)`;
         });
 
         const WORKER_URL = 'https://satellite-proxy.aaaaadamobe19.workers.dev';
@@ -237,9 +303,9 @@
                 selectedTracker = found;
                 map.setView([found.lat, found.lng], Math.max(map.getZoom(), 4));
                 showTrajectory(found);
-                statusDiv.innerText = `FOUND: ${found.name} [NORAD: ${found.noradId}]`;
+                statusDiv.innerText = `FOUND: ${found.name}`;
             } else {
-                statusDiv.innerText = `SATELLITE NOT FOUND (LOAD CATEGORY FIRST)`;
+                statusDiv.innerText = `SATELLITE NOT FOUND`;
             }
         }
 
@@ -332,9 +398,9 @@
 
         function updateStatusText() {
             if (allTrackers.length === 0) {
-                statusDiv.innerText = "SELECT A CATEGORY TO BEGIN...";
+                statusDiv.innerText = "SELECT A CATEGORY...";
             } else {
-                statusDiv.innerText = `READY: TRACKING ${allTrackers.length} SATELLITES`;
+                statusDiv.innerText = `TRACKING ${allTrackers.length} SATELLITES`;
             }
         }
 
@@ -381,7 +447,7 @@
                 orbitLayers.push(polyline);
             });
 
-            statusDiv.innerText = `SHOWING: ${tracker.name} [NORAD: ${tracker.noradId}]`;
+            statusDiv.innerText = `SHOWING: ${tracker.name}`;
         }
 
         function clearTrajectory() {
@@ -446,7 +512,7 @@
                                     if (dist <= 100) {
                                         if (!tracker.notified) {
                                             tracker.notified = true;
-                                            alert(`⚠️ PASS ALERT: ${tracker.name} is passing within ${Math.round(dist)}km of your location!`);
+                                            alert(`⚠️ PASS ALERT: ${tracker.name} is within ${Math.round(dist)}km!`);
                                         }
                                     } else if (dist > 150) {
                                         tracker.notified = false;
