@@ -28,8 +28,8 @@
             position: absolute; 
             top: 20px; 
             right: 20px; 
-            z-index: 1000; 
-            background: rgba(0,0,0,0.85); 
+            z-index: 3000; 
+            background: rgba(10, 10, 15, 0.95); 
             padding: 15px; 
             border: 1px solid #00ffff; 
             border-radius: 8px; 
@@ -38,10 +38,10 @@
             overflow-y: auto; 
             width: 280px; 
             box-sizing: border-box;
-            transition: transform 0.3s ease-in-out, bottom 0.3s ease-in-out;
+            box-shadow: 0 4px 20px rgba(0,255,255,0.2);
         }
 
-        #controls label { display: block; margin-bottom: 8px; cursor: pointer; }
+        #controls label { display: block; margin-bottom: 8px; cursor: pointer; color: #fff; }
         #controls input[type="checkbox"] { cursor: pointer; margin-right: 8px; }
         
         #search-box { width: 100%; box-sizing: border-box; background: #111; border: 1px solid #00ffff; color: #fff; padding: 6px; font-family: monospace; border-radius: 4px; margin-bottom: 6px; }
@@ -57,7 +57,7 @@
             position: fixed; 
             bottom: 20px; 
             right: 20px; 
-            z-index: 2000; 
+            z-index: 3500; 
             width: 55px; 
             height: 55px; 
             border-radius: 50%; 
@@ -70,62 +70,53 @@
             box-shadow: 0 4px 10px rgba(0,255,255,0.4); 
         }
 
-        /* Flight-Radar Style Bottom Info Panel */
+        /* Flight-Radar Style Bottom Info Panel (Mobile Only) / Centered Floating Card (Desktop) */
         #sat-info-panel {
             display: none;
             position: fixed;
-            bottom: -100%;
-            left: 0;
-            width: 100vw;
             z-index: 2500;
-            background: rgba(0,0,0,0.95);
-            border-top: 2px solid #00ffff;
+            background: rgba(10, 10, 15, 0.98);
+            border: 2px solid #00ffff;
             padding: 20px;
-            border-radius: 16px 16px 0 0;
             box-sizing: border-box;
             font-family: monospace;
-            box-shadow: 0 -4px 25px rgba(0,255,255,0.3);
-            max-height: 45vh;
+            box-shadow: 0 0 25px rgba(0,255,255,0.3);
             overflow-y: auto;
-            transition: bottom 0.3s ease-in-out;
         }
-        #sat-info-panel.panel-open {
-            bottom: 0;
-        }
+
         #sat-info-panel h3 { color: #00ffff; margin-top: 0; font-size: 16px; border-bottom: 1px solid #00ffff; padding-bottom: 8px; }
         .sat-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
-        .sat-info-row { font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(0,255,255,0.2); padding-bottom: 4px; }
+        .sat-info-row { font-size: 12px; margin-bottom: 6px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(0,255,255,0.2); padding-bottom: 4px; color: #fff; }
         .sat-info-row span { color: #88ccff; }
-        .sat-info-row b { color: #fff; text-align: right; }
+        .sat-info-row b { color: #ffffff; text-align: right; }
 
         /* Modal Styles */
-        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 4000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
         .modal-content { background: #111; border: 1px solid #00ffff; padding: 20px; border-radius: 8px; width: 320px; color: #fff; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         .modal-content h3 { color: #00ffff; margin-top: 0; }
         .modal-content label { display: block; margin-bottom: 6px; cursor: pointer; font-size: 11px; }
         .modal-content button { width: 100%; background: #00ffff; color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; margin-top: 5px; }
         .close-modal { background: #ff0055 !important; color: #fff !important; }
 
-        /* Mobile & Desktop Map Shift Adjustments */
-        body.panel-shifted #map { 
-            transform: translateY(-45vh); 
-        }
-
         @media (min-width: 769px) {
-            #controls {
+            /* Desktop Layout: Top-right floating card, map does not shift */
+            #sat-info-panel {
                 top: 20px;
-                right: 20px;
-                bottom: auto;
-                transform: translateX(120%);
-                transition: transform 0.3s ease-in-out;
+                left: 20px;
+                width: 380px;
+                max-height: 85vh;
+                border-radius: 8px;
+                display: none;
             }
-            #controls.desktop-open {
-                transform: translateX(0);
+            #sat-info-panel.panel-open {
+                display: block;
             }
         }
 
         @media (max-width: 768px) {
             #status { top: 10px; left: 10px; right: 10px; font-size: 11px; text-align: center; }
+            
+            /* Mobile Drawer for Settings Menu */
             #controls { 
                 top: auto; 
                 bottom: -100%; 
@@ -133,12 +124,29 @@
                 left: 0; 
                 width: 100%; 
                 max-height: 55vh; 
-                border-radius: 12px 12px 0 0; 
+                border-radius: 16px 16px 0 0; 
                 transition: bottom 0.3s ease-in-out; 
                 padding: 20px; 
             }
             #controls.mobile-open { 
                 bottom: 0; 
+            }
+
+            /* Mobile Flight Radar Info Panel at Bottom */
+            #sat-info-panel {
+                bottom: -100%;
+                left: 0;
+                width: 100vw;
+                max-height: 45vh;
+                border-radius: 16px 16px 0 0;
+                transition: bottom 0.3s ease-in-out;
+            }
+            #sat-info-panel.panel-open {
+                bottom: 0;
+            }
+
+            body.panel-shifted #map { 
+                transform: translateY(-22.5vh); 
             }
             body.menu-shifted #map { 
                 transform: translateY(-160px); 
@@ -152,7 +160,7 @@
     
     <button id="menu-toggle-btn">⚙️</button>
 
-    <!-- Flight-Radar Style Bottom Info Panel -->
+    <!-- Satellite Info Telemetry Panel -->
     <div id="sat-info-panel">
         <h3 id="panel-sat-name">SATELLITE TELEMETRY</h3>
         <div class="sat-info-grid">
@@ -197,6 +205,7 @@
         </div>
     </div>
 
+    <!-- Settings Controls Panel -->
     <div id="controls">
         <b>ALERTS:</b><br><br>
         <button id="open-notif-modal" class="action-btn">⚙️ NOTIFICATION SETTINGS</button>
@@ -217,6 +226,7 @@
         <label><input type="checkbox" value="weather" class="cat-box"> Weather & Earth</label>
         <label><input type="checkbox" value="active" class="cat-box" checked style="border-top: 1px dashed #00ffff; padding-top: 8px;"> 🌐 All Active Satellites</label>
     </div>
+    
     <div id="map"></div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -304,10 +314,21 @@
                 menuToggleBtn.innerText = isOpen ? '✕' : '⚙️';
                 setTimeout(() => { map.invalidateSize(); }, 300);
             } else {
-                const isOpen = controlsPanel.classList.toggle('desktop-open');
-                menuToggleBtn.innerText = isOpen ? '✕' : '⚙️';
+                // Toggle display style for desktop menu popup
+                if (controlsPanel.style.display === 'block') {
+                    controlsPanel.style.display = 'none';
+                    menuToggleBtn.innerText = '⚙️';
+                } else {
+                    controlsPanel.style.display = 'block';
+                    menuToggleBtn.innerText = '✕';
+                }
             }
         });
+
+        // Initialize desktop controls visibility
+        if (window.innerWidth > 768) {
+            controlsPanel.style.display = 'none';
+        }
 
         const satInfoPanel = document.getElementById('sat-info-panel');
         document.getElementById('panel-close-btn').addEventListener('click', () => {
@@ -396,7 +417,6 @@
 
             if (found) {
                 selectedTracker = found;
-                map.setView([found.lat, found.lng], Math.max(map.getZoom(), 6));
                 showTrajectory(found);
                 openSatelliteInfoPanel(found);
                 statusDiv.innerText = `FOUND: ${found.name}`;
@@ -576,8 +596,14 @@
             document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + '°';
 
             satInfoPanel.classList.add('panel-open');
-            document.body.classList.add('panel-shifted');
-            setTimeout(() => { map.invalidateSize(); }, 300);
+            if (window.innerWidth <= 768) {
+                document.body.classList.add('panel-shifted');
+            }
+            
+            setTimeout(() => { 
+                map.invalidateSize(); 
+                map.setView([tracker.lat, tracker.lng], Math.max(map.getZoom(), 6));
+            }, 300);
         }
 
         function showTrajectory(tracker) {
