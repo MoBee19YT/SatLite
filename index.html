@@ -3,37 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>High-Performance Satellite Tracker with NORAD Search</title>
+    <title>High-Performance Satellite Tracker with User Location & Advanced Passes</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/satellite.js/4.1.4/satellite.min.js"></script>
     <style>
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: monospace; }
         #map { width: 100vw; height: 100vh; background: #000; }
         #status { position: absolute; top: 20px; left: 20px; z-index: 1000; background: rgba(0,0,0,0.8); padding: 10px 20px; border: 1px solid #00ffff; color: #00ffff; border-radius: 8px; font-size: 13px; pointer-events: none; }
-        #controls { position: absolute; top: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.85); padding: 15px; border: 1px solid #00ffff; border-radius: 8px; font-size: 12px; max-height: 85vh; overflow-y: auto; width: 240px; }
+        #controls { position: absolute; top: 20px; right: 20px; z-index: 1000; background: rgba(0,0,0,0.85); padding: 15px; border: 1px solid #00ffff; border-radius: 8px; font-size: 12px; max-height: 85vh; overflow-y: auto; width: 260px; }
         #controls label { display: block; margin-bottom: 8px; cursor: pointer; }
         #controls input[type="checkbox"] { cursor: pointer; margin-right: 8px; }
         #search-box { width: 100%; box-sizing: border-box; background: #111; border: 1px solid #00ffff; color: #fff; padding: 6px; font-family: monospace; border-radius: 4px; margin-bottom: 6px; }
         #search-hint { font-size: 10px; color: #888; margin-bottom: 8px; display: block; }
-        #search-btn { width: 100%; background: #00ffff; color: #000; border: none; padding: 6px; font-family: monospace; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 15px; }
-        #search-btn:hover { background: #00cccc; }
+        .action-btn { width: 100%; background: #00ffff; color: #000; border: none; padding: 6px; font-family: monospace; font-weight: bold; cursor: pointer; border-radius: 4px; margin-bottom: 12px; }
+        .action-btn:hover { background: #00cccc; }
+        .section-divider { border-top: 1px dashed #00ffff; margin: 12px 0; padding-top: 8px; }
+
+        /* Modal Styles */
+        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-content { background: #111; border: 1px solid #00ffff; padding: 20px; border-radius: 8px; width: 320px; color: #fff; max-height: 90vh; overflow-y: auto; }
+        .modal-content h3 { color: #00ffff; margin-top: 0; }
+        .modal-content label { display: block; margin-bottom: 6px; cursor: pointer; font-size: 11px; }
+        .modal-content button { width: 100%; background: #00ffff; color: #000; border: none; padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: monospace; margin-top: 5px; }
+        .close-modal { background: #ff0055 !important; color: #fff !important; }
     </style>
 </head>
 <body>
 
-    <div id="status">SELECT A CATEGORY TO BEGIN...</div>
+    <div id="status">INITIALIZING TRACKER...</div>
+    
+    <!-- Notification Setup Modal Popup -->
+    <div id="notif-modal">
+        <div class="modal-content">
+            <h3>PASS NOTIFICATION SETUP</h3>
+            <p style="font-size: 11px; color: #aaa;">Select categories & conditions for overhead alerts (100km radius):</p>
+            
+            <b>Target Categories:</b>
+            <label><input type="checkbox" id="modal-cat-stations" checked> Space Stations (incl. ISS)</label>
+            <label><input type="checkbox" id="modal-cat-visual"> Brightest / Visual</label>
+            <label><input type="checkbox" id="modal-cat-starlink"> Starlink</label>
+            <label><input type="checkbox" id="modal-cat-weather"> Weather & Earth</label>
+            <label><input type="checkbox" id="modal-cat-active"> All Active Satellites</label>
+
+            <div class="section-divider"></div>
+
+            <b>Time Conditions:</b>
+            <label><input type="checkbox" id="modal-time-day" checked> Day Passes</label>
+            <label><input type="checkbox" id="modal-time-night" checked> Night Passes</label>
+
+            <button id="save-modal-btn">SET NOTIFICATIONS</button>
+            <button class="action-btn close-modal" id="close-modal-btn">CLOSE</button>
+        </div>
+    </div>
+
     <div id="controls">
+        <b>ALERTS:</b><br><br>
+        <button id="open-notif-modal" class="action-btn">⚙️ NOTIFICATION SETTINGS</button>
+
+        <div class="section-divider"></div>
+
         <b>SEARCH SATELLITE:</b><br><br>
-        <input type="text" id="search-box" placeholder="Name or NORAD ID (e.g. 25544)">
-        <span id="search-hint">Search by Name or NORAD ID</span>
-        <button id="search-btn">FIND SATELLITE</button>
+        <input type="text" id="search-box" placeholder="Name or NORAD ID">
+        <span id="search-hint">Search by Name or NORAD</span>
+        <button id="search-btn" class="action-btn">FIND SATELLITE</button>
+
+        <div class="section-divider"></div>
 
         <b>CATEGORIES:</b><br><br>
         <label><input type="checkbox" value="stations" class="cat-box"> Space Stations</label>
         <label><input type="checkbox" value="visual" class="cat-box"> Brightest / Visual</label>
         <label><input type="checkbox" value="starlink" class="cat-box"> Starlink</label>
         <label><input type="checkbox" value="weather" class="cat-box"> Weather & Earth</label>
-        <label><input type="checkbox" value="active" class="cat-box" style="border-top: 1px dashed #00ffff; padding-top: 8px;"> 🌐 All Active Satellites</label>
+        <label><input type="checkbox" value="active" class="cat-box" checked style="border-top: 1px dashed #00ffff; padding-top: 8px;"> 🌐 All Active Satellites</label>
     </div>
     <div id="map"></div>
 
@@ -41,6 +82,18 @@
 
     <script>
         const canvasRenderer = L.canvas({ padding: 0.5 });
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days*24*60*60*1000));
+            document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+        }
 
         const map = L.map('map', { 
             attributionControl: false,
@@ -64,8 +117,92 @@
         let selectedTracker = null;
         let orbitLayers = [];
         let trajectoryEndTime = 0;
+        let userMarker = null;
+
+        // Automatic Geolocation Detection & Red Dot Marker Placement
+        let userLat = null;
+        let userLng = null;
+
+        const savedLoc = getCookie('auto_user_loc');
+        if (savedLoc) {
+            const coords = savedLoc.split(',');
+            userLat = parseFloat(coords[0]);
+            userLng = parseFloat(coords[1]);
+            placeUserMarker(userLat, userLng);
+        } else if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((pos) => {
+                userLat = pos.coords.latitude;
+                userLng = pos.coords.longitude;
+                setCookie('auto_user_loc', `${userLat},${userLng}`, 30);
+                placeUserMarker(userLat, userLng);
+            }, () => {
+                console.warn('Geolocation access unavailable.');
+            });
+        }
+
+        function placeUserMarker(lat, lng) {
+            if (userMarker) {
+                map.removeLayer(userMarker);
+            }
+            // Distinct red dot indicator for user position
+            userMarker = L.circleMarker([lat, lng], {
+                radius: 6,
+                color: '#ffffff',
+                fillColor: '#ff0000',
+                fillOpacity: 1,
+                weight: 2
+            }).addTo(map).bindPopup("<b>Your Location</b>");
+        }
+
+        // Notification Settings configuration
+        let notificationSettings = {
+            enabled: false,
+            categories: new Set(['stations']),
+            allowDay: true,
+            allowNight: true
+        };
+
+        // Modal Elements Control
+        const modal = document.getElementById('notif-modal');
+        document.getElementById('open-notif-modal').addEventListener('click', () => {
+            modal.style.display = 'flex';
+        });
+        document.getElementById('close-modal-btn').addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        document.getElementById('save-modal-btn').addEventListener('click', () => {
+            if (!userLat || !userLng) {
+                alert('Acquiring your location coordinates... Please ensure location permissions are enabled.');
+            }
+
+            notificationSettings.categories.clear();
+            if (document.getElementById('modal-cat-stations').checked) notificationSettings.categories.add('stations');
+            if (document.getElementById('modal-cat-visual').checked) notificationSettings.categories.add('visual');
+            if (document.getElementById('modal-cat-starlink').checked) notificationSettings.categories.add('starlink');
+            if (document.getElementById('modal-cat-weather').checked) notificationSettings.categories.add('weather');
+            if (document.getElementById('modal-cat-active').checked) notificationSettings.categories.add('active');
+
+            notificationSettings.allowDay = document.getElementById('modal-time-day').checked;
+            notificationSettings.allowNight = document.getElementById('modal-time-night').checked;
+            notificationSettings.enabled = true;
+
+            modal.style.display = 'none';
+            statusDiv.innerText = `NOTIFICATIONS ACTIVE (${notificationSettings.categories.size} categories selected)`;
+        });
 
         const WORKER_URL = 'https://satellite-proxy.aaaaadamobe19.workers.dev';
+
+        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * (Math.PI / 180);
+            const dLon = (lon2 - lon1) * (Math.PI / 180);
+            const a = 
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * 
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+        }
 
         document.querySelectorAll('.cat-box').forEach(box => {
             box.addEventListener('change', async (e) => {
@@ -79,7 +216,6 @@
             });
         });
 
-        // Enhanced Search Engine Supporting Names & NORAD IDs
         document.getElementById('search-btn').addEventListener('click', executeSearch);
         document.getElementById('search-box').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') executeSearch();
@@ -91,7 +227,6 @@
 
             let found = null;
             for (let tracker of allTrackers) {
-                // Match either by name or by exact NORAD ID contained in line 2 of TLE data
                 if (tracker.name.toUpperCase().includes(query) || tracker.noradId === query) {
                     found = tracker;
                     break;
@@ -102,7 +237,7 @@
                 selectedTracker = found;
                 map.setView([found.lat, found.lng], Math.max(map.getZoom(), 4));
                 showTrajectory(found);
-                statusDiv.innerText = `FOUND: ${found.name} (NORAD: ${found.noradId})`;
+                statusDiv.innerText = `FOUND: ${found.name} [NORAD: ${found.noradId}]`;
             } else {
                 statusDiv.innerText = `SATELLITE NOT FOUND (LOAD CATEGORY FIRST)`;
             }
@@ -132,7 +267,6 @@
 
                 if (!(line1 && line2 && line1.startsWith('1 ') && line2.startsWith('2 '))) continue;
 
-                // Extract NORAD catalog ID from Line 2 (characters 3 to 7)
                 const noradId = line2.substring(2, 7).trim();
 
                 if (nameToTracker.has(name)) {
@@ -160,7 +294,8 @@
                         marker: marker,
                         isVisible: false,
                         lat: 0,
-                        lng: 0
+                        lng: 0,
+                        notified: false
                     };
 
                     marker.on('click', (e) => {
@@ -267,6 +402,9 @@
                     const currentZoom = map.getZoom();
                     const bounds = map.getBounds();
 
+                    const currentHour = now.getUTCHours();
+                    const isDayTime = currentHour >= 6 && currentHour < 18;
+
                     let skipFactor = 1;
                     if (currentZoom <= 2 && allTrackers.length > 2000) skipFactor = 4;
                     else if (currentZoom === 3 && allTrackers.length > 2000) skipFactor = 2;
@@ -291,6 +429,30 @@
                             tracker.lat = lat;
                             tracker.lng = lng;
                             const latLng = [lat, lng];
+
+                            if (notificationSettings.enabled && userLat !== null && userLng !== null) {
+                                let matchCat = false;
+                                for (let cat of tracker.categories) {
+                                    if (notificationSettings.categories.has(cat)) {
+                                        matchCat = true;
+                                        break;
+                                    }
+                                }
+
+                                const matchesTimeCondition = (isDayTime && notificationSettings.allowDay) || (!isDayTime && notificationSettings.allowNight);
+
+                                if (matchCat && matchesTimeCondition) {
+                                    const dist = getDistanceFromLatLonInKm(lat, lng, userLat, userLng);
+                                    if (dist <= 100) {
+                                        if (!tracker.notified) {
+                                            tracker.notified = true;
+                                            alert(`⚠️ PASS ALERT: ${tracker.name} is passing within ${Math.round(dist)}km of your location!`);
+                                        }
+                                    } else if (dist > 150) {
+                                        tracker.notified = false;
+                                    }
+                                }
+                            }
 
                             const isInsideScreen = bounds.contains(latLng);
 
@@ -320,6 +482,8 @@
 
         map.on('click', () => clearTrajectory());
         startMasterAnimationLoop();
+
+        loadCategory('active');
     </script>
 </body>
 </html>
