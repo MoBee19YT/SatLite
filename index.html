@@ -496,6 +496,7 @@
         <button class="menu-toggle-btn" id="settings-toggle-btn" title="Map Theme & Passes">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.04.64.09.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         </button>
+        <!-- Hidden on PC via JS/CSS check -->
         <button class="menu-toggle-btn" id="ar-toggle-btn" title="AR Sky View">
             <svg viewBox="0 0 24 24"><path d="M4 4h4V2H2v6h2V4zm16 0v4h2V2h-6v2h4zM4 20v-4H2v6h6v-2H4zm16 0h-4v2h6v-6h-2v4zM12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
         </button>
@@ -666,6 +667,13 @@
                 }
             }, 60);
         })();
+
+        // --- HIDE/REMOVE AR ON PC/DESKTOP ---
+        const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
+        const arToggleBtn = document.getElementById('ar-toggle-btn');
+        if (!isMobileDevice) {
+            if (arToggleBtn) arToggleBtn.style.display = 'none'; // Completely non-existent / invisible on PC
+        }
 
         const canvasRenderer = L.canvas({ padding: 0.5 });
 
@@ -1132,6 +1140,179 @@
             orbitLayers.forEach(layer => map.removeLayer(layer));
             orbitLayers = [];
             selectedTracker = null;
+        }
+
+        // --- AR PERMISSIONS & LOGIC ---
+        let arActive = false;
+        let userLocation = { lat: 0, lng: 0, alt: 0 };
+        let deviceHeading = 0;
+        let devicePitch = 0;
+        let compassCalibrationOffset = 0;
+        let arStream = null;
+
+        if (arToggleBtn) {
+            arToggleBtn.addEventListener('click', async () => {
+                const arView = document.getElementById('ar-view');
+                const arVideo = document.getElementById('ar-video');
+                const arStatusText = document.getElementById('ar-status-text');
+
+                arStatusText.innerText = "REQUESTING LOCATION...";
+                
+                // 1. Request Location Permission
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLocation.lat = position.coords.latitude;
+                            userLocation.lng = position.coords.longitude;
+                            userLocation.alt = position.coords.altitude || 0;
+                            initCameraAndAR();
+                        },
+                        (error) => {
+                            arStatusText.innerText = "LOCATION DENIED OR UNAVAILABLE";
+                            // Fallback default coordinates if denied
+                            userLocation.lat = 0; userLocation.lng = 0;
+                            initCameraAndAR();
+                        },
+                        { enableHighAccuracy: true }
+                    );
+                } else {
+                    initCameraAndAR();
+                }
+            });
+        }
+
+        async function initCameraAndAR() {
+            const arView = document.getElementById('ar-view');
+            const arVideo = document.getElementById('ar-video');
+            const arStatusText = document.getElementById('ar-status-text');
+
+            arStatusText.innerText = "REQUESTING CAMERA ACCESS...";
+
+            try {
+                arStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' },
+                    audio: false
+                });
+                arVideo.srcObject = arStream;
+                arView.style.display = 'block';
+                arActive = true;
+                arToggleBtn.classList.add('ar-toggle-btn-active');
+                arStatusText.innerText = "AR ACTIVE: POINT DEVICE AT SKY";
+
+                // Request Orientation Permissions for iOS/Android
+                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    DeviceOrientationEvent.requestPermission().then(response => {
+                        if (response === 'granted') {
+                            window.addEventListener('deviceorientation', handleOrientation, true);
+                        }
+                    }).catch(console.error);
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                }
+
+                startARLoop();
+            } catch (err) {
+                arStatusText.innerText = "CAMERA PERMISSION DENIED";
+                console.error(err);
+            }
+        }
+
+        function handleOrientation(event) {
+            if (event.alpha !== null) {
+                deviceHeading = 360 - event.alpha; // Compass heading
+            }
+            if (event.beta !== null) {
+                devicePitch = event.beta; // Up/down tilt
+            }
+        }
+
+        document.getElementById('ar-close-btn').addEventListener('click', () => {
+            const arView = document.getElementById('ar-view');
+            arView.style.display = 'none';
+            arActive = false;
+            if (arToggleBtn) arToggleBtn.classList.remove('ar-toggle-btn-active');
+
+            if (arStream) {
+                arStream.getTracks().forEach(track => track.stop());
+                arStream = null;
+            }
+            window.removeEventListener('deviceorientation', handleOrientation, true);
+        });
+
+        document.getElementById('ar-calibrate-plus').addEventListener('click', () => {
+            compassCalibrationOffset = (compassCalibrationOffset + 5) % 360;
+            document.getElementById('ar-calibration-label').innerText = `COMPASS CAL: ${compassCalibrationOffset}°`;
+        });
+        document.getElementById('ar-calibrate-minus').addEventListener('click', () => {
+            compassCalibrationOffset = (compassCalibrationOffset - 5 + 360) % 360;
+            document.getElementById('ar-calibration-label').innerText = `COMPASS CAL: ${compassCalibrationOffset}°`;
+        });
+
+        function startARLoop() {
+            const markerLayer = document.getElementById('ar-marker-layer');
+            
+            function arLoop() {
+                if (!arActive) return;
+                markerLayer.innerHTML = '';
+                const now = new Date();
+                const gmst = satellite.gstime(now);
+
+                const screenWidth = window.innerWidth;
+                const screenHeight = window.innerHeight;
+                const fov = 60; // Approximate camera field of view in degrees
+
+                allTrackers.forEach(tracker => {
+                    const pv = satellite.propagate(tracker.satrec, now);
+                    if (pv.position) {
+                        const geo = satellite.eciToGeodetic(pv.position, gmst);
+                        const targetLat = satellite.degreesLat(geo.latitude);
+                        const targetLng = satellite.degreesLong(geo.longitude);
+                        const targetAlt = geo.height;
+
+                        // Simple Vector Calculations to get Azimuth and Elevation relative to User
+                        const dLng = (targetLng - userLocation.lng) * (Math.PI / 180);
+                        const lat1R = userLocation.lat * (Math.PI / 180);
+                        const lat2R = targetLat * (Math.PI / 180);
+
+                        const y = Math.sin(dLng) * Math.cos(lat2R);
+                        const x = Math.cos(lat1R) * Math.sin(lat2R) - Math.sin(lat1R) * Math.cos(lat2R) * Math.cos(dLng);
+                        let azimuth = Math.atan2(y, x) * (180 / Math.PI);
+                        azimuth = (azimuth + 360) % 360;
+
+                        // Rough Elevation calculation
+                        const R_earth = 6371; // km
+                        const dist = Math.sqrt(Math.pow(targetLat - userLocation.lat, 2) + Math.pow(targetLng - userLocation.lng, 2)) * 111; // rough km
+                        const elevation = Math.atan2(targetAlt, dist) * (180 / Math.PI);
+
+                        // Relative bearing from current device heading
+                        let relAzimuth = (azimuth - (deviceHeading + compassCalibrationOffset) + 540) % 360 - 180;
+                        let relElevation = elevation - (devicePitch - 90); // Adjusting pitch relative to holding device forward
+
+                        // Check if within camera screen bounds
+                        if (Math.abs(relAzimuth) < fov / 2 && Math.abs(relElevation) < fov / 2) {
+                            const screenX = (screenWidth / 2) + (relAzimuth / (fov / 2)) * (screenWidth / 2);
+                            const screenY = (screenHeight / 2) - (relElevation / (fov / 2)) * (screenHeight / 2);
+
+                            const markerEl = document.createElement('div');
+                            markerEl.className = 'ar-marker';
+                            markerEl.style.left = `${screenX}px`;
+                            markerEl.style.top = `${screenY}px`;
+                            markerEl.innerHTML = `
+                                <div class="ar-marker-dot"></div>
+                                <div class="ar-marker-label">${tracker.name}</div>
+                            `;
+                            markerEl.addEventListener('click', () => {
+                                selectSatellite({ stopPropagation: () => {} }, tracker);
+                                document.getElementById('ar-close-btn').click();
+                            });
+                            markerLayer.appendChild(markerEl);
+                        }
+                    }
+                });
+
+                requestAnimationFrame(arLoop);
+            }
+            requestAnimationFrame(arLoop);
         }
 
         function startMasterAnimationLoop() {
