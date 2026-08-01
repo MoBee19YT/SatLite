@@ -449,21 +449,33 @@
         }
         #ar-calibration {
             position: absolute;
-            bottom: 30px; left: 0; right: 0;
+            bottom: 25px; left: 15px; right: 15px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            gap: 16px;
+            gap: 10px;
             z-index: 5100;
+            background: rgba(0, 0, 0, 0.75);
+            padding: 12px 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(0, 243, 255, 0.4);
+            backdrop-filter: blur(8px);
+        }
+        .ar-cal-controls-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            gap: 10px;
         }
         #ar-calibration button {
             pointer-events: auto;
-            width: 46px; height: 46px;
+            width: 40px; height: 40px;
             border-radius: 50%;
             background: rgba(0,0,0,0.7);
             color: var(--neon-cyan);
             border: 1px solid var(--neon-cyan);
-            font-size: 16px;
+            font-size: 14px;
             cursor: pointer;
         }
         #ar-calibration-label {
@@ -472,6 +484,39 @@
             background: rgba(0,0,0,0.6);
             padding: 6px 10px;
             border-radius: 10px;
+        }
+        .ar-range-slider-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .ar-range-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--neon-cyan);
+            font-weight: bold;
+        }
+        .ar-range-slider-container input[type="range"] {
+            pointer-events: auto;
+            appearance: none;
+            -webkit-appearance: none;
+            background: rgba(0, 243, 255, 0.2);
+            height: 6px;
+            border-radius: 3px;
+            outline: none;
+            width: 100%;
+        }
+        .ar-range-slider-container input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            -webkit-appearance: none;
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+            background: var(--neon-cyan);
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-cyan);
         }
         .ar-toggle-btn-active {
             box-shadow: 0 0 25px var(--neon-cyan) !important;
@@ -508,14 +553,23 @@
         <div id="ar-crosshair"></div>
 
         <div id="ar-hud">
-            <div id="ar-status-text">INITIALIZING AR TELEMETRY (100KM RANGE)...</div>
+            <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
             <button id="ar-close-btn">✕</button>
         </div>
 
         <div id="ar-calibration">
-            <button id="ar-calibrate-minus">−5°</button>
-            <div id="ar-calibration-label">COMPASS CAL: 0°</div>
-            <button id="ar-calibrate-plus">+5°</button>
+            <div class="ar-cal-controls-row">
+                <button id="ar-calibrate-minus">−5°</button>
+                <div id="ar-calibration-label">COMPASS CAL: 0°</div>
+                <button id="ar-calibrate-plus">+5°</button>
+            </div>
+            <div class="ar-range-slider-container">
+                <div class="ar-range-info">
+                    <span>AR MAX DISTANCE</span>
+                    <span id="ar-range-val-display">100 KM</span>
+                </div>
+                <input type="range" id="ar-distance-slider" min="10" max="500" value="100" step="10">
+            </div>
         </div>
     </div>
 
@@ -542,7 +596,7 @@
     <div id="notif-modal">
         <div class="modal-content">
             <h3>GROUND PASS NOTIFICATIONS</h3>
-            <p style="font-size: 10px; color: var(--text-main);">Trigger precise proximity alerts within a 100km radius:</p>
+            <p style="font-size: 10px; color: var(--text-main);">Trigger precise proximity alerts within range:</p>
             
             <b>Target Categories:</b>
             <label><input type="checkbox" id="modal-cat-stations" checked> Space Stations (ISS, CSS)</label>
@@ -722,7 +776,6 @@
         let userLocationMarker = null;
         let userRangeCircle = null;
 
-        // Initialize user location tracking & draw 100km circle on map
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -732,7 +785,6 @@
                     
                     map.setView([userLocation.lat, userLocation.lng], 6);
 
-                    // Add pulsing circle marker for user position
                     const userIcon = L.divIcon({
                         className: 'sat-badge-icon',
                         html: '<div style="width:16px;height:16px;border-radius:50%;background:#00f3ff;box-shadow:0 0 15px #00f3ff;border:2px solid #fff;"></div>',
@@ -741,9 +793,8 @@
                     });
                     userLocationMarker = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map);
                     
-                    // Add 100 km radius circle
                     userRangeCircle = L.circle([userLocation.lat, userLocation.lng], {
-                        radius: 100000, // 100 km in meters
+                        radius: 100000,
                         color: '#00f3ff',
                         weight: 1,
                         opacity: 0.6,
@@ -1181,19 +1232,29 @@
             selectedTracker = null;
         }
 
-        // --- AR PERMISSIONS & LOGIC (100km Filter & Simplified Name/Class HUD) ---
+        // --- AR PERMISSIONS & LOGIC (Adjustable Range Slider) ---
         let arActive = false;
         let deviceHeading = 0;
         let devicePitch = 0;
         let compassCalibrationOffset = 0;
+        let arMaxDistanceKm = 100;
         let arStream = null;
+
+        const arDistanceSlider = document.getElementById('ar-distance-slider');
+        const arRangeValDisplay = document.getElementById('ar-range-val-display');
+
+        arDistanceSlider.addEventListener('input', (e) => {
+            arMaxDistanceKm = parseInt(e.target.value, 10);
+            arRangeValDisplay.innerText = `${arMaxDistanceKm} KM`;
+            document.getElementById('ar-status-text').innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
+        });
 
         if (arToggleBtn) {
             arToggleBtn.addEventListener('click', async () => {
                 const arView = document.getElementById('ar-view');
                 const arStatusText = document.getElementById('ar-status-text');
 
-                arStatusText.innerText = "ACQUIRING POSITION FOR 100KM AR RANGE...";
+                arStatusText.innerText = `ACQUIRING POSITION FOR ${arMaxDistanceKm}KM AR RANGE...`;
                 
                 if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
@@ -1204,7 +1265,7 @@
                             initCameraAndAR();
                         },
                         (error) => {
-                            arStatusText.innerText = "USING DEFAULT LOCATION FOR 100KM AR";
+                            arStatusText.innerText = `USING DEFAULT LOCATION FOR ${arMaxDistanceKm}KM AR`;
                             initCameraAndAR();
                         },
                         { enableHighAccuracy: true }
@@ -1231,7 +1292,7 @@
                 arView.style.display = 'block';
                 arActive = true;
                 arToggleBtn.classList.add('ar-toggle-btn-active');
-                arStatusText.innerText = "AR ACTIVE (100 KM PROXIMITY LIMIT)";
+                arStatusText.innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
 
                 if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                     DeviceOrientationEvent.requestPermission().then(response => {
@@ -1302,13 +1363,12 @@
                         const targetLng = satellite.degreesLong(geo.longitude);
                         const targetAlt = geo.height;
 
-                        // Calculate distance from user location to check 100km range limit
                         const dLatKm = (targetLat - userLocation.lat) * 111;
                         const dLngKm = (targetLng - userLocation.lng) * 111 * Math.cos(userLocation.lat * Math.PI / 180);
                         const distanceKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
 
-                        // Strict 100 km boundary filter for AR
-                        if (distanceKm > 100) return;
+                        // Dynamic distance filter controlled by the new AR slider
+                        if (distanceKm > arMaxDistanceKm) return;
 
                         const dLng = (targetLng - userLocation.lng) * (Math.PI / 180);
                         const lat1R = userLocation.lat * (Math.PI / 180);
@@ -1333,7 +1393,6 @@
                             markerEl.style.left = `${screenX}px`;
                             markerEl.style.top = `${screenY}px`;
                             
-                            // MODIFIED: Display ONLY Name and Class/Status to remove clutter
                             markerEl.innerHTML = `
                                 <div class="ar-marker-dot"></div>
                                 <div class="ar-marker-label">${tracker.name} | ${tracker.specificType.toUpperCase()}</div>
