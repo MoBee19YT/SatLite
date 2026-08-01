@@ -468,6 +468,14 @@
             align-items: flex-start;
             pointer-events: none;
         }
+        #ar-status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            pointer-events: auto;
+            max-width: 70vw;
+        }
         #ar-status-text {
             background: rgba(0,0,0,0.7);
             color: var(--neon-cyan);
@@ -475,8 +483,24 @@
             border-radius: 14px;
             font-size: 11px;
             letter-spacing: 0.5px;
-            max-width: 60vw;
-            pointer-events: none;
+            border: 1px solid rgba(0, 243, 255, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        #ar-toggle-panel-btn {
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 10px var(--neon-cyan-glow);
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+        #ar-toggle-panel-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            transform: scale(1.02);
         }
         #ar-close-btn {
             pointer-events: auto;
@@ -490,47 +514,31 @@
         }
         #ar-calibration {
             position: absolute;
-            bottom: 25px; left: 15px; right: 15px;
+            top: 130px; left: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             gap: 10px;
             z-index: 5100;
-            background: rgba(0, 0, 0, 0.75);
-            padding: 12px 16px;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 14px 16px;
             border-radius: 18px;
             border: 1px solid rgba(0, 243, 255, 0.4);
             backdrop-filter: blur(8px);
+            width: 280px;
+            box-sizing: border-box;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
-        .ar-cal-controls-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            gap: 10px;
-        }
-        #ar-calibration button {
-            pointer-events: auto;
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            background: rgba(0,0,0,0.7);
-            color: var(--neon-cyan);
-            border: 1px solid var(--neon-cyan);
-            font-size: 14px;
-            cursor: pointer;
-        }
-        #ar-calibration-label {
-            color: #fff;
-            font-size: 10px;
-            background: rgba(0,0,0,0.6);
-            padding: 6px 10px;
-            border-radius: 10px;
+        #ar-calibration.collapsed {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(-10px);
         }
         .ar-range-slider-container {
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
+            pointer-events: auto;
         }
         .ar-range-info {
             display: flex;
@@ -578,7 +586,7 @@
     <div id="compass-permission-modal">
         <div class="permission-box">
             <h3>COMPASS ACCESS REQUIRED</h3>
-            <p>To align satellite telemetry coordinates with your device orientation in AR sky mode, compass and motion sensor authorization is required[cite: 7].</p>
+            <p>To align satellite telemetry coordinates with your device orientation in AR sky mode, compass and motion sensor authorization is required.</p>
             <button id="grant-compass-btn" class="action-btn">GRANT PERMISSION</button>
             <button id="deny-compass-btn" class="action-btn close-modal" style="margin-top: 6px;">CANCEL</button>
         </div>
@@ -604,16 +612,14 @@
         <div id="ar-crosshair"></div>
 
         <div id="ar-hud">
-            <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
+            <div id="ar-status-container">
+                <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
+                <button id="ar-toggle-panel-btn">⚙ HIDE RANGE CONTROL</button>
+            </div>
             <button id="ar-close-btn">✕</button>
         </div>
 
         <div id="ar-calibration">
-            <div class="ar-cal-controls-row">
-                <button id="ar-calibrate-minus">−5°</button>
-                <div id="ar-calibration-label">COMPASS CAL: 0°</div>
-                <button id="ar-calibrate-plus">+5°</button>
-            </div>
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
                     <span>AR MAX DISTANCE</span>
@@ -1287,7 +1293,6 @@
         let arActive = false;
         let deviceHeading = 0;
         let devicePitch = 0;
-        let compassCalibrationOffset = 0;
         let arMaxDistanceKm = 100;
         let arStream = null;
 
@@ -1304,7 +1309,6 @@
 
         if (arToggleBtn) {
             arToggleBtn.addEventListener('click', () => {
-                // Intercept AR activation to prompt for Compass Permission first
                 compassPermissionModal.style.display = 'flex';
             });
         }
@@ -1316,7 +1320,6 @@
         document.getElementById('grant-compass-btn').addEventListener('click', async () => {
             compassPermissionModal.style.display = 'none';
 
-            // Handle iOS 13+ permission request structure vs standard Android/Desktop
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
                     const response = await DeviceOrientationEvent.requestPermission();
@@ -1330,7 +1333,6 @@
                     startARWorkflow();
                 }
             } else {
-                // Non-iOS or legacy browsers fallback directly
                 startARWorkflow();
             }
         });
@@ -1406,13 +1408,17 @@
             window.removeEventListener('deviceorientation', handleOrientation, true);
         });
 
-        document.getElementById('ar-calibrate-plus').addEventListener('click', () => {
-            compassCalibrationOffset = (compassCalibrationOffset + 5) % 360;
-            document.getElementById('ar-calibration-label').innerText = `COMPASS CAL: ${compassCalibrationOffset}°`;
-        });
-        document.getElementById('ar-calibrate-minus').addEventListener('click', () => {
-            compassCalibrationOffset = (compassCalibrationOffset - 5 + 360) % 360;
-            document.getElementById('ar-calibration-label').innerText = `COMPASS CAL: ${compassCalibrationOffset}°`;
+        // Toggle visibility for the AR Range control panel via button under text
+        const arTogglePanelBtn = document.getElementById('ar-toggle-panel-btn');
+        const arCalibrationPanel = document.getElementById('ar-calibration');
+
+        arTogglePanelBtn.addEventListener('click', () => {
+            arCalibrationPanel.classList.toggle('collapsed');
+            if (arCalibrationPanel.classList.contains('collapsed')) {
+                arTogglePanelBtn.innerText = '⚙ SHOW RANGE CONTROL';
+            } else {
+                arTogglePanelBtn.innerText = '⚙ HIDE RANGE CONTROL';
+            }
         });
 
         function startARLoop() {
@@ -1453,7 +1459,7 @@
 
                         const elevation = Math.atan2(targetAlt, distanceKm) * (180 / Math.PI);
 
-                        let relAzimuth = (azimuth - (deviceHeading + compassCalibrationOffset) + 540) % 360 - 180;
+                        let relAzimuth = (azimuth - deviceHeading + 540) % 360 - 180;
                         let relElevation = elevation - (devicePitch - 90);
 
                         if (Math.abs(relAzimuth) < fov / 2 && Math.abs(relElevation) < fov / 2) {
