@@ -327,7 +327,7 @@
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
         @media (min-width: 769px) {
-            #sat-info-panel { top: 20px; right: 20px; width: 420px; max-height: 85vh; } /* Repositioned to right side on desktop */
+            #sat-info-panel { top: 20px; right: 20px; width: 420px; max-height: 85vh; }
             #sat-info-panel.panel-open { display: block; }
         }
 
@@ -931,7 +931,7 @@
         }
 
         function openSatelliteInfoPanel(tracker) {
-            closeAllPanels(); // Ensure settings/filters close when info panel opens
+            closeAllPanels();
 
             document.getElementById('panel-sat-name').innerText = tracker.name;
             document.getElementById('panel-norad').innerText = tracker.noradId;
