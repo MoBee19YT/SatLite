@@ -236,7 +236,6 @@
             transition: bottom 0.3s ease-in-out;
         }
 
-        .floating-buttons.shifted-up { bottom: calc(50vh + 25px); }
         .floating-buttons.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); transition: opacity 0.3s ease, transform 0.3s ease; }
 
         .menu-toggle-btn { 
@@ -331,6 +330,7 @@
         @media (min-width: 769px) {
             #sat-info-panel { top: 20px; left: 20px; width: 420px; max-height: 85vh; }
             #sat-info-panel.panel-open { display: block; }
+            .floating-buttons.shifted-up { bottom: calc(50vh + 25px); } /* Keep desktop shift behavior intact */
         }
 
         @media (max-width: 768px) {
@@ -345,6 +345,7 @@
                 max-height: 60vh; 
                 border-radius: 28px 28px 0 0; 
                 transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
+                z-index: 3600; /* Ensure mobile filters and settings stay above other panels */
             }
             #controls.mobile-open, #filters-panel.mobile-open { bottom: 0; display: block !important; }
 
@@ -355,6 +356,7 @@
                 max-height: 45vh;
                 border-radius: 28px 28px 0 0;
                 transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+                z-index: 2500;
             }
             #sat-info-panel.panel-open { bottom: 0; display: block !important; }
         }
@@ -648,18 +650,44 @@
         function closeAllPanels() {
             filtersPanel.style.display = 'none';
             controlsPanel.style.display = 'none';
+            filtersPanel.classList.remove('mobile-open');
+            controlsPanel.classList.remove('mobile-open');
         }
 
         filtersToggleBtn.addEventListener('click', () => {
-            const isOpen = filtersPanel.style.display === 'block';
+            const isDesktop = window.innerWidth > 768;
+            const isOpen = isDesktop ? filtersPanel.style.display === 'block' : filtersPanel.classList.contains('mobile-open');
+            
             closeAllPanels();
-            if (!isOpen) filtersPanel.style.display = 'block';
+            satInfoPanel.classList.remove('panel-open');
+            satInfoPanel.style.display = 'none';
+
+            if (!isOpen) {
+                if (isDesktop) {
+                    filtersPanel.style.display = 'block';
+                } else {
+                    filtersPanel.style.display = 'block';
+                    setTimeout(() => filtersPanel.classList.add('mobile-open'), 10);
+                }
+            }
         });
 
         settingsToggleBtn.addEventListener('click', () => {
-            const isOpen = controlsPanel.style.display === 'block';
+            const isDesktop = window.innerWidth > 768;
+            const isOpen = isDesktop ? controlsPanel.style.display === 'block' : controlsPanel.classList.contains('mobile-open');
+            
             closeAllPanels();
-            if (!isOpen) controlsPanel.style.display = 'block';
+            satInfoPanel.classList.remove('panel-open');
+            satInfoPanel.style.display = 'none';
+
+            if (!isOpen) {
+                if (isDesktop) {
+                    controlsPanel.style.display = 'block';
+                } else {
+                    controlsPanel.style.display = 'block';
+                    setTimeout(() => controlsPanel.classList.add('mobile-open'), 10);
+                }
+            }
         });
 
         const satInfoPanel = document.getElementById('sat-info-panel');
@@ -901,6 +929,8 @@
         }
 
         function openSatelliteInfoPanel(tracker) {
+            closeAllPanels(); // Ensure settings/filters close when info panel opens
+
             document.getElementById('panel-sat-name').innerText = tracker.name;
             document.getElementById('panel-norad').innerText = tracker.noradId;
             document.getElementById('panel-type').innerText = tracker.specificType.toUpperCase();
@@ -918,14 +948,8 @@
 
             satInfoPanel.style.display = 'block';
             setTimeout(() => { satInfoPanel.classList.add('panel-open'); }, 10);
-            closeAllNames();
 
             map.setView([tracker.lat, tracker.lng], Math.max(map.getZoom(), 6));
-        }
-
-        function closeAllNames() {
-            filtersPanel.style.display = 'none';
-            controlsPanel.style.display = 'none';
         }
 
         function showTrajectory(tracker) {
