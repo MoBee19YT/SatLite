@@ -326,6 +326,67 @@
         .modal-content button:hover { transform: scale(1.03); }
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
+        /* ---------- COOKIE BANNER OVERLAY ---------- */
+        #cookie-banner {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            max-width: 380px;
+            background: var(--panel-bg);
+            border: double 3px transparent;
+            background-image: linear-gradient(var(--panel-bg), var(--panel-bg)), var(--gradient-primary);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            padding: 20px;
+            border-radius: var(--bubble-radius);
+            z-index: 8000;
+            box-shadow: 0 0 30px var(--neon-cyan-glow);
+            backdrop-filter: blur(12px);
+            font-family: monospace;
+            color: var(--text-main);
+            display: none;
+        }
+        #cookie-banner h4 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            color: var(--neon-cyan);
+            font-size: 13px;
+            letter-spacing: 1px;
+        }
+        #cookie-banner p {
+            font-size: 10px;
+            line-height: 1.4;
+            color: var(--text-dim);
+            margin-bottom: 14px;
+        }
+        .cookie-btn-group {
+            display: flex;
+            gap: 10px;
+        }
+        .cookie-btn {
+            flex: 1;
+            padding: 8px;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            border: none;
+            letter-spacing: 0.5px;
+            transition: transform 0.15s ease;
+        }
+        #cookie-accept-btn {
+            background: var(--gradient-primary);
+            color: #000;
+            box-shadow: 0 0 10px var(--neon-cyan-glow);
+        }
+        #cookie-reject-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border: 1px solid rgba(0, 243, 255, 0.3);
+        }
+        .cookie-btn:hover { transform: scale(1.03); }
+
         /* ---------- PERMISSION OVERLAY MODAL ---------- */
         #compass-permission-modal {
             display: none;
@@ -582,6 +643,16 @@
         <div class="loading-status-text" id="loading-status-text">Connecting to orbital NORAD node...</div>
     </div>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-banner">
+        <h4>TELEMETRY COOKIE CONSENT</h4>
+        <p>We utilize local session tokens and caching scripts to optimize satellite tracking performance and maintain user configuration preferences.</p>
+        <div class="cookie-btn-group">
+            <button id="cookie-accept-btn" class="cookie-btn">ACCEPT ALL</button>
+            <button id="cookie-reject-btn" class="cookie-btn">NECESSARY ONLY</button>
+        </div>
+    </div>
+
     <!-- Compass / Orientation Permission Prompt Modal -->
     <div id="compass-permission-modal">
         <div class="permission-box">
@@ -748,6 +819,29 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // Cookie Consent Integration logic
+        (function() {
+            const cookieBanner = document.getElementById('cookie-banner');
+            const acceptBtn = document.getElementById('cookie-accept-btn');
+            const rejectBtn = document.getElementById('cookie-reject-btn');
+
+            if (!localStorage.getItem('sat_cookie_consent')) {
+                setTimeout(() => {
+                    cookieBanner.style.display = 'block';
+                }, 1000);
+            }
+
+            acceptBtn.addEventListener('click', () => {
+                localStorage.setItem('sat_cookie_consent', 'accepted');
+                cookieBanner.style.display = 'none';
+            });
+
+            rejectBtn.addEventListener('click', () => {
+                localStorage.setItem('sat_cookie_consent', 'rejected');
+                cookieBanner.style.display = 'none';
+            });
+        })();
+
         (function() {
             const fill = document.getElementById('loading-bar-fill');
             const txt = document.getElementById('loading-status-text');
