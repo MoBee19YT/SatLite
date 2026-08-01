@@ -326,6 +326,47 @@
         .modal-content button:hover { transform: scale(1.03); }
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
+        /* ---------- PERMISSION OVERLAY MODAL ---------- */
+        #compass-permission-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            z-index: 6000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+        .permission-box {
+            background: var(--panel-bg);
+            border: double 3px transparent;
+            background-image: linear-gradient(var(--panel-bg), var(--panel-bg)), var(--gradient-primary);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            padding: 30px;
+            border-radius: var(--bubble-radius);
+            width: 340px;
+            text-align: center;
+            box-shadow: 0 0 50px var(--neon-cyan-glow);
+            color: var(--text-main);
+            font-family: monospace;
+        }
+        .permission-box h3 {
+            color: var(--neon-cyan);
+            margin-top: 0;
+            font-size: 15px;
+            letter-spacing: 1px;
+        }
+        .permission-box p {
+            font-size: 11px;
+            color: var(--text-dim);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
         @media (min-width: 769px) {
             #sat-info-panel { top: 20px; right: 20px; width: 420px; max-height: 85vh; }
             #sat-info-panel.panel-open { display: block; }
@@ -531,6 +572,16 @@
             <div class="loading-bar-fill" id="loading-bar-fill"></div>
         </div>
         <div class="loading-status-text" id="loading-status-text">Connecting to orbital NORAD node...</div>
+    </div>
+
+    <!-- Compass / Orientation Permission Prompt Modal -->
+    <div id="compass-permission-modal">
+        <div class="permission-box">
+            <h3>COMPASS ACCESS REQUIRED</h3>
+            <p>To align satellite telemetry coordinates with your device orientation in AR sky mode, compass and motion sensor authorization is required[cite: 7].</p>
+            <button id="grant-compass-btn" class="action-btn">GRANT PERMISSION</button>
+            <button id="deny-compass-btn" class="action-btn close-modal" style="margin-top: 6px;">CANCEL</button>
+        </div>
     </div>
 
     <div id="status">INITIALIZING SYSTEM...</div>
@@ -1232,7 +1283,7 @@
             selectedTracker = null;
         }
 
-        // --- AR PERMISSIONS & LOGIC (Adjustable Range Slider) ---
+        // --- AR PERMISSIONS & LOGIC ---
         let arActive = false;
         let deviceHeading = 0;
         let devicePitch = 0;
@@ -1249,31 +1300,62 @@
             document.getElementById('ar-status-text').innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
         });
 
-        if (arToggleBtn) {
-            arToggleBtn.addEventListener('click', async () => {
-                const arView = document.getElementById('ar-view');
-                const arStatusText = document.getElementById('ar-status-text');
+        const compassPermissionModal = document.getElementById('compass-permission-modal');
 
-                arStatusText.innerText = `ACQUIRING POSITION FOR ${arMaxDistanceKm}KM AR RANGE...`;
-                
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            userLocation.lat = position.coords.latitude;
-                            userLocation.lng = position.coords.longitude;
-                            userLocation.alt = position.coords.altitude || 0;
-                            initCameraAndAR();
-                        },
-                        (error) => {
-                            arStatusText.innerText = `USING DEFAULT LOCATION FOR ${arMaxDistanceKm}KM AR`;
-                            initCameraAndAR();
-                        },
-                        { enableHighAccuracy: true }
-                    );
-                } else {
-                    initCameraAndAR();
-                }
+        if (arToggleBtn) {
+            arToggleBtn.addEventListener('click', () => {
+                // Intercept AR activation to prompt for Compass Permission first
+                compassPermissionModal.style.display = 'flex';
             });
+        }
+
+        document.getElementById('deny-compass-btn').addEventListener('click', () => {
+            compassPermissionModal.style.display = 'none';
+        });
+
+        document.getElementById('grant-compass-btn').addEventListener('click', async () => {
+            compassPermissionModal.style.display = 'none';
+
+            // Handle iOS 13+ permission request structure vs standard Android/Desktop
+            if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                try {
+                    const response = await DeviceOrientationEvent.requestPermission();
+                    if (response === 'granted') {
+                        startARWorkflow();
+                    } else {
+                        alert("Compass permission was denied. AR sky tracking orientation may not function properly.");
+                    }
+                } catch (e) {
+                    console.error(e);
+                    startARWorkflow();
+                }
+            } else {
+                // Non-iOS or legacy browsers fallback directly
+                startARWorkflow();
+            }
+        });
+
+        function startARWorkflow() {
+            const arStatusText = document.getElementById('ar-status-text');
+            arStatusText.innerText = `ACQUIRING POSITION FOR ${arMaxDistanceKm}KM AR RANGE...`;
+            
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation.lat = position.coords.latitude;
+                        userLocation.lng = position.coords.longitude;
+                        userLocation.alt = position.coords.altitude || 0;
+                        initCameraAndAR();
+                    },
+                    (error) => {
+                        arStatusText.innerText = `USING DEFAULT LOCATION FOR ${arMaxDistanceKm}KM AR`;
+                        initCameraAndAR();
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                initCameraAndAR();
+            }
         }
 
         async function initCameraAndAR() {
@@ -1294,16 +1376,7 @@
                 arToggleBtn.classList.add('ar-toggle-btn-active');
                 arStatusText.innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
 
-                if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-                    DeviceOrientationEvent.requestPermission().then(response => {
-                        if (response === 'granted') {
-                            window.addEventListener('deviceorientation', handleOrientation, true);
-                        }
-                    }).catch(console.error);
-                } else {
-                    window.addEventListener('deviceorientation', handleOrientation, true);
-                }
-
+                window.addEventListener('deviceorientation', handleOrientation, true);
                 startARLoop();
             } catch (err) {
                 arStatusText.innerText = "CAMERA ACCESS DENIED";
@@ -1367,7 +1440,6 @@
                         const dLngKm = (targetLng - userLocation.lng) * 111 * Math.cos(userLocation.lat * Math.PI / 180);
                         const distanceKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
 
-                        // Dynamic distance filter controlled by the new AR slider
                         if (distanceKm > arMaxDistanceKm) return;
 
                         const dLng = (targetLng - userLocation.lng) * (Math.PI / 180);
