@@ -52,6 +52,9 @@
         .action-btn:hover { background: #00cccc; }
         .section-divider { border-top: 1px dashed #00ffff; margin: 12px 0; padding-top: 8px; }
 
+        /* Map Theme Selector */
+        #theme-select { width: 100%; box-sizing: border-box; background: #111; border: 1px solid #00ffff; color: #fff; padding: 6px; font-family: monospace; border-radius: 4px; margin-bottom: 6px; cursor: pointer; }
+
         /* Universal Toggle Button (Desktop & Mobile) */
         #menu-toggle-btn { 
             display: block; 
@@ -206,6 +209,15 @@
 
     <!-- Settings Controls Panel -->
     <div id="controls">
+        <b>MAP THEME:</b><br><br>
+        <select id="theme-select">
+            <option value="dark" selected>Dark Mode</option>
+            <option value="terrain">Terrain / Satellite Imagery</option>
+            <option value="light">Light Mode (White)</option>
+        </select>
+
+        <div class="section-divider"></div>
+
         <b>ALERTS:</b><br><br>
         <button id="open-notif-modal" class="action-btn">⚙️ NOTIFICATION SETTINGS</button>
 
@@ -253,12 +265,32 @@
             renderer: canvasRenderer
         }).setView([0, 0], 2);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        // Tile layer setup with Dark, Terrain/Satellite, and Light options
+        const themes = {
+            dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            terrain: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', // Esri World Imagery (real earth satellite imagery)
+            light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+        };
+
+        let currentTileLayer = L.tileLayer(themes.dark, {
             maxZoom: 18,
             minZoom: 2,
             noWrap: false,
             renderer: canvasRenderer
         }).addTo(map);
+
+        document.getElementById('theme-select').addEventListener('change', (e) => {
+            const selectedTheme = e.target.value;
+            if (themes[selectedTheme]) {
+                map.removeLayer(currentTileLayer);
+                currentTileLayer = L.tileLayer(themes[selectedTheme], {
+                    maxZoom: 18,
+                    minZoom: 2,
+                    noWrap: false,
+                    renderer: canvasRenderer
+                }).addTo(map);
+            }
+        });
 
         const statusDiv = document.getElementById('status');
         
