@@ -233,10 +233,10 @@
             display: flex;
             gap: 14px;
             align-items: center;
-            transition: bottom 0.3s ease-in-out;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        .floating-buttons.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .floating-buttons.hidden { opacity: 0; pointer-events: none; transform: scale(0.8); }
 
         .menu-toggle-btn { 
             width: 60px; 
@@ -266,7 +266,6 @@
             box-shadow: 0 0 25px var(--neon-cyan);
         }
 
-        /* Fixed Icon Centering Styles */
         .sat-badge-icon {
             background: transparent;
             border: none;
@@ -328,9 +327,8 @@
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
         @media (min-width: 769px) {
-            #sat-info-panel { top: 20px; left: 20px; width: 420px; max-height: 85vh; }
+            #sat-info-panel { top: 20px; right: 20px; width: 420px; max-height: 85vh; } /* Repositioned to right side on desktop */
             #sat-info-panel.panel-open { display: block; }
-            .floating-buttons.shifted-up { bottom: calc(50vh + 25px); } /* Keep desktop shift behavior intact */
         }
 
         @media (max-width: 768px) {
@@ -345,7 +343,7 @@
                 max-height: 60vh; 
                 border-radius: 28px 28px 0 0; 
                 transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
-                z-index: 3600; /* Ensure mobile filters and settings stay above other panels */
+                z-index: 3600; 
             }
             #controls.mobile-open, #filters-panel.mobile-open { bottom: 0; display: block !important; }
 
@@ -575,10 +573,6 @@
         let selectedTracker = null;
         let orbitLayers = [];
         let trajectoryEndTime = 0;
-        let userMarker = null;
-
-        let userLat = null;
-        let userLng = null;
 
         let advancedFiltersActive = false;
         let sliderMinAlt = 0, sliderMaxAlt = 40000;
@@ -646,12 +640,27 @@
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const filtersPanel = document.getElementById('filters-panel');
         const controlsPanel = document.getElementById('controls');
+        const floatingBtnsContainer = document.getElementById('floating-btns-container');
+        const satInfoPanel = document.getElementById('sat-info-panel');
+
+        function updateFloatingButtonsVisibility() {
+            const isFiltersOpen = filtersPanel.style.display === 'block' || filtersPanel.classList.contains('mobile-open');
+            const isSettingsOpen = controlsPanel.style.display === 'block' || controlsPanel.classList.contains('mobile-open');
+            const isInfoOpen = satInfoPanel.style.display === 'block' || satInfoPanel.classList.contains('panel-open');
+
+            if (isFiltersOpen || isSettingsOpen || isInfoOpen) {
+                floatingBtnsContainer.classList.add('hidden');
+            } else {
+                floatingBtnsContainer.classList.remove('hidden');
+            }
+        }
 
         function closeAllPanels() {
             filtersPanel.style.display = 'none';
             controlsPanel.style.display = 'none';
             filtersPanel.classList.remove('mobile-open');
             controlsPanel.classList.remove('mobile-open');
+            updateFloatingButtonsVisibility();
         }
 
         filtersToggleBtn.addEventListener('click', () => {
@@ -670,6 +679,7 @@
                     setTimeout(() => filtersPanel.classList.add('mobile-open'), 10);
                 }
             }
+            updateFloatingButtonsVisibility();
         });
 
         settingsToggleBtn.addEventListener('click', () => {
@@ -688,9 +698,8 @@
                     setTimeout(() => controlsPanel.classList.add('mobile-open'), 10);
                 }
             }
+            updateFloatingButtonsVisibility();
         });
-
-        const satInfoPanel = document.getElementById('sat-info-panel');
 
         let notificationSettings = {
             enabled: false,
@@ -720,14 +729,6 @@
         });
 
         const WORKER_URL = 'https://satellite-proxy.aaaaadamobe19.workers.dev';
-
-        function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * (Math.PI / 180);
-            const dLon = (lon2 - lon1) * (Math.PI / 180);
-            const a = Math.sin(dLat / 2)**2 + Math.cos(lat1 * (Math.PI / 180)) * Math.cos(lat2 * (Math.PI / 180)) * Math.sin(dLon / 2)**2;
-            return R * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
-        }
 
         document.querySelectorAll('.cat-box').forEach(box => {
             box.addEventListener('change', async (e) => {
@@ -899,6 +900,7 @@
                         clearTrajectory();
                         satInfoPanel.classList.remove('panel-open');
                         satInfoPanel.style.display = 'none';
+                        updateFloatingButtonsVisibility();
                     }
                     removeTrackerLayers(tracker);
                     allTrackers.splice(i, 1);
@@ -947,7 +949,10 @@
             document.getElementById('panel-regime').innerText = regimeStr;
 
             satInfoPanel.style.display = 'block';
-            setTimeout(() => { satInfoPanel.classList.add('panel-open'); }, 10);
+            setTimeout(() => { 
+                satInfoPanel.classList.add('panel-open'); 
+                updateFloatingButtonsVisibility();
+            }, 10);
 
             map.setView([tracker.lat, tracker.lng], Math.max(map.getZoom(), 6));
         }
@@ -1098,6 +1103,7 @@
             satInfoPanel.classList.remove('panel-open');
             satInfoPanel.style.display = 'none';
             closeAllPanels();
+            updateFloatingButtonsVisibility();
         });
 
         startMasterAnimationLoop();
