@@ -39,6 +39,7 @@
             width: 280px; 
             box-sizing: border-box;
             box-shadow: 0 4px 20px rgba(0,255,255,0.2);
+            display: none; /* Controlled dynamically via JS */
         }
 
         #controls label { display: block; margin-bottom: 8px; cursor: pointer; color: #fff; }
@@ -70,7 +71,7 @@
             box-shadow: 0 4px 10px rgba(0,255,255,0.4); 
         }
 
-        /* Flight-Radar Style Bottom Info Panel (Mobile Only) / Centered Floating Card (Desktop) */
+        /* Flight-Radar Style Bottom Info Panel */
         #sat-info-panel {
             display: none;
             position: fixed;
@@ -106,7 +107,6 @@
                 width: 380px;
                 max-height: 85vh;
                 border-radius: 8px;
-                display: none;
             }
             #sat-info-panel.panel-open {
                 display: block;
@@ -126,13 +126,13 @@
                 max-height: 55vh; 
                 border-radius: 16px 16px 0 0; 
                 transition: bottom 0.3s ease-in-out; 
-                padding: 20px; 
             }
             #controls.mobile-open { 
                 bottom: 0; 
+                display: block !important;
             }
 
-            /* Mobile Flight Radar Info Panel at Bottom */
+            /* Mobile Flight Radar Info Panel at Bottom, Full Width */
             #sat-info-panel {
                 bottom: -100%;
                 left: 0;
@@ -143,6 +143,7 @@
             }
             #sat-info-panel.panel-open {
                 bottom: 0;
+                display: block !important;
             }
 
             body.panel-shifted #map { 
@@ -177,8 +178,6 @@
                 <div class="sat-info-row"><span>INCLINATION:</span> <b id="panel-incl">-</b></div>
             </div>
         </div>
-        <div class="section-divider"></div>
-        <button id="panel-close-btn" class="action-btn close-modal">CLOSE TELEMETRY</button>
     </div>
 
     <!-- Notification Setup Modal Popup -->
@@ -310,12 +309,17 @@
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
                 const isOpen = controlsPanel.classList.toggle('mobile-open');
+                if (isOpen) {
+                    controlsPanel.style.display = 'block';
+                } else {
+                    setTimeout(() => { if (!controlsPanel.classList.contains('mobile-open')) controlsPanel.style.display = 'none'; }, 300);
+                }
                 document.body.classList.toggle('menu-shifted', isOpen);
                 menuToggleBtn.innerText = isOpen ? '✕' : '⚙️';
                 setTimeout(() => { map.invalidateSize(); }, 300);
             } else {
-                // Toggle display style for desktop menu popup
-                if (controlsPanel.style.display === 'block') {
+                const currentDisplay = window.getComputedStyle(controlsPanel).display;
+                if (currentDisplay === 'block') {
                     controlsPanel.style.display = 'none';
                     menuToggleBtn.innerText = '⚙️';
                 } else {
@@ -325,18 +329,7 @@
             }
         });
 
-        // Initialize desktop controls visibility
-        if (window.innerWidth > 768) {
-            controlsPanel.style.display = 'none';
-        }
-
         const satInfoPanel = document.getElementById('sat-info-panel');
-        document.getElementById('panel-close-btn').addEventListener('click', () => {
-            satInfoPanel.classList.remove('panel-open');
-            document.body.classList.remove('panel-shifted');
-            setTimeout(() => { map.invalidateSize(); }, 300);
-            clearTrajectory();
-        });
 
         let notificationSettings = {
             enabled: false,
@@ -548,6 +541,7 @@
                     if (selectedTracker === tracker) {
                         clearTrajectory();
                         satInfoPanel.classList.remove('panel-open');
+                        satInfoPanel.style.display = 'none';
                         document.body.classList.remove('panel-shifted');
                     }
                     removeTrackerLayers(tracker);
@@ -595,7 +589,11 @@
             document.getElementById('panel-vel').innerText = tracker.vel.toFixed(2) + ' km/s';
             document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + '°';
 
-            satInfoPanel.classList.add('panel-open');
+            satInfoPanel.style.display = 'block';
+            setTimeout(() => {
+                satInfoPanel.classList.add('panel-open');
+            }, 10);
+
             if (window.innerWidth <= 768) {
                 document.body.classList.add('panel-shifted');
             }
@@ -779,6 +777,7 @@
         map.on('click', () => {
             clearTrajectory();
             satInfoPanel.classList.remove('panel-open');
+            satInfoPanel.style.display = 'none';
             document.body.classList.remove('panel-shifted');
             setTimeout(() => { map.invalidateSize(); }, 300);
         });
