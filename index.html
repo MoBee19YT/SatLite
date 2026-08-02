@@ -20,15 +20,22 @@
             --bubble-radius: 24px;
         }
 
-        /* Light Theme Variable Overrides */
+        /* Light Theme Variable Overrides - Crisp White/Light Mode */
         body.light-theme {
-            --bg-deep: #f0f4f8;
-            --panel-bg: rgba(240, 244, 248, 0.95);
-            --text-main: #111111;
-            --text-dim: #333333;
-            --gradient-primary: linear-gradient(135deg, #0077ff 0%, #00aaff 100%);
-            --neon-cyan: #0066cc;
-            --neon-cyan-glow: rgba(0, 102, 204, 0.3);
+            --bg-deep: #f4f6f9;
+            --panel-bg: rgba(255, 255, 255, 0.96);
+            --text-main: #1e293b;
+            --text-dim: #64748b;
+            --gradient-primary: linear-gradient(135deg, #0ea5e9 0%, #2563eb 100%);
+            --neon-cyan: #0284c7;
+            --neon-cyan-glow: rgba(2, 132, 199, 0.2);
+            --border-color: rgba(14, 165, 233, 0.4);
+        }
+
+        /* Make search box placeholder white specifically in Light Mode */
+        body.light-theme #search-box::placeholder {
+            color: #ffffff;
+            opacity: 1; /* Ensures full white opacity across different browsers */
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Courier New', Courier, monospace; overflow: hidden; transition: background 0.3s ease, color 0.3s ease; }
@@ -95,7 +102,7 @@
             font-size: 12px; 
             letter-spacing: 1px;
             pointer-events: none; 
-            box-shadow: 0 0 20px var(--neon-cyan-glow);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
             backdrop-filter: blur(10px);
         }
 
@@ -116,7 +123,7 @@
             overflow-y: auto; 
             width: 340px; 
             box-sizing: border-box;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.9), 0 0 25px var(--neon-cyan-glow);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.12), 0 0 15px var(--neon-cyan-glow);
             display: none; 
             backdrop-filter: blur(14px);
             color: var(--text-main);
@@ -128,9 +135,9 @@
         #search-box { 
             width: 100%; 
             box-sizing: border-box; 
-            background: rgba(0,0,0,0.6); 
+            background: rgba(128, 128, 128, 0.08); 
             border: double 2px transparent;
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), var(--gradient-primary);
+            background-image: linear-gradient(rgba(128, 128, 128, 0.08), rgba(128, 128, 128, 0.08)), var(--gradient-primary);
             background-origin: border-box;
             background-clip: padding-box, border-box;
             color: var(--text-main); 
@@ -141,12 +148,12 @@
             outline: none; 
         }
         #search-box:focus { box-shadow: 0 0 15px var(--neon-cyan-glow); }
-        #search-hint { font-size: 9px; color: var(--text-main); margin-bottom: 12px; display: block; letter-spacing: 0.5px; }
+        #search-hint { font-size: 9px; color: var(--text-dim); margin-bottom: 12px; display: block; letter-spacing: 0.5px; }
         
         .action-btn { 
             width: 100%; 
             background: var(--gradient-primary); 
-            color: #000; 
+            color: #ffffff; 
             border: none; 
             padding: 12px; 
             font-family: monospace; 
@@ -156,20 +163,20 @@
             margin-bottom: 12px; 
             transition: transform 0.2s ease, box-shadow 0.2s ease; 
             letter-spacing: 1px; 
-            box-shadow: 0 4px 20px rgba(0, 243, 255, 0.3); 
+            box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25); 
         }
         .action-btn:hover { 
             transform: scale(1.03); 
-            box-shadow: 0 0 22px var(--neon-cyan); 
+            box-shadow: 0 0 20px var(--neon-cyan); 
         }
-        .section-divider { border-top: 2px dashed rgba(0, 243, 255, 0.3); margin: 16px 0; padding-top: 4px; }
+        .section-divider { border-top: 2px dashed rgba(128, 128, 128, 0.2); margin: 16px 0; padding-top: 4px; }
 
-        #theme-select { 
+        #theme-select, #perf-mode-select { 
             width: 100%; 
             box-sizing: border-box; 
-            background: rgba(0,0,0,0.6); 
+            background: rgba(128, 128, 128, 0.08); 
             border: double 2px transparent;
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), var(--gradient-primary);
+            background-image: linear-gradient(rgba(128, 128, 128, 0.08), rgba(128, 128, 128, 0.08)), var(--gradient-primary);
             background-origin: border-box;
             background-clip: padding-box, border-box;
             color: var(--text-main); 
@@ -179,12 +186,39 @@
             margin-bottom: 8px; 
             cursor: pointer; 
             outline: none; 
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+        }
+
+        /* Light Mode: render these as a solid gradient pill (matching .action-btn's
+           look elsewhere in the app) with text forced white — without this, the
+           closed select's text follows --text-main, which is dark in light mode
+           and unreadable against the blue fill. */
+        body.light-theme #theme-select,
+        body.light-theme #perf-mode-select {
+            background: var(--gradient-primary);
+            border: none;
+            color: #ffffff;
+        }
+
+        /* Explicit Styling for Dropdown Options (Dark Mode / Default) */
+        #theme-select option, #perf-mode-select option {
+            background-color: #060c18;
+            color: #ffffff;
+        }
+
+        /* Explicit Styling for Dropdown Options (Light Mode - White Text) */
+        body.light-theme #theme-select option, 
+        body.light-theme #perf-mode-select option {
+            background-color: #1e293b;
+            color: #ffffff;
         }
 
         .range-slider-group {
             margin-bottom: 14px;
-            background: rgba(0, 243, 255, 0.03);
-            border: 1px solid rgba(0, 243, 255, 0.2);
+            background: rgba(128, 128, 128, 0.04);
+            border: 1px solid rgba(128, 128, 128, 0.15);
             padding: 12px;
             border-radius: 14px;
         }
@@ -215,7 +249,7 @@
             margin: 0;
         }
         .range-slider-wrapper input[type="range"]::-webkit-slider-runnable-track {
-            background: rgba(0, 243, 255, 0.2);
+            background: rgba(128, 128, 128, 0.2);
             height: 4px;
             border-radius: 2px;
         }
@@ -228,7 +262,7 @@
             border-radius: 50%;
             background: var(--neon-cyan);
             cursor: pointer;
-            box-shadow: 0 0 10px var(--neon-cyan);
+            box-shadow: 0 0 8px var(--neon-cyan-glow);
             margin-top: -6px;
             transition: transform 0.15s ease;
         }
@@ -260,7 +294,7 @@
             background-origin: border-box;
             background-clip: padding-box, border-box;
             cursor: pointer; 
-            box-shadow: 0 6px 25px rgba(0,0,0,0.7), 0 0 20px var(--neon-cyan-glow); 
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1), 0 0 15px var(--neon-cyan-glow); 
             display: flex;
             align-items: center;
             justify-content: center;
@@ -274,7 +308,7 @@
         }
         .menu-toggle-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 0 25px var(--neon-cyan);
+            box-shadow: 0 0 20px var(--neon-cyan);
         }
 
         .sat-badge-icon {
@@ -302,19 +336,19 @@
             border-radius: var(--bubble-radius);
             box-sizing: border-box;
             font-family: monospace;
-            box-shadow: 0 0 45px rgba(0,0,0,0.9), 0 0 25px var(--neon-cyan-glow);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15), 0 0 20px var(--neon-cyan-glow);
             overflow-y: auto;
             backdrop-filter: blur(14px);
             color: var(--text-main);
         }
 
-        #sat-info-panel h3 { color: var(--text-main); margin-top: 0; font-size: 15px; border-bottom: 2px solid rgba(0, 243, 255, 0.4); padding-bottom: 10px; letter-spacing: 1px; }
+        #sat-info-panel h3 { color: var(--text-main); margin-top: 0; font-size: 15px; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; letter-spacing: 1px; }
         .sat-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-        .sat-info-row { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(255,255,255,0.1); padding-bottom: 5px; color: var(--text-main); }
-        .sat-info-row span { color: var(--text-main); }
+        .sat-info-row { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(128,128,128,0.2); padding-bottom: 5px; color: var(--text-dim); }
+        .sat-info-row span { color: var(--text-dim); }
         .sat-info-row b { color: var(--text-main); text-align: right; }
 
-        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 4000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; backdrop-filter: blur(8px); }
+        #notif-modal { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); z-index: 4000; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; backdrop-filter: blur(6px); }
         .modal-content { 
             background: var(--panel-bg); 
             border: double 3px transparent;
@@ -328,12 +362,12 @@
             max-height: 90vh; 
             overflow-y: auto; 
             box-sizing: border-box; 
-            box-shadow: 0 0 45px rgba(0,243,255,0.3); 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15); 
             backdrop-filter: blur(14px); 
         }
         .modal-content h3 { color: var(--text-main); margin-top: 0; font-size: 15px; letter-spacing: 1px; }
         .modal-content label { display: block; margin-bottom: 10px; cursor: pointer; font-size: 11px; color: var(--text-main); }
-        .modal-content button { width: 100%; background: var(--gradient-primary); color: #000; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 16px; font-family: monospace; margin-top: 8px; letter-spacing: 1px; transition: transform 0.2s ease; }
+        .modal-content button { width: 100%; background: var(--gradient-primary); color: #ffffff; border: none; padding: 12px; font-weight: bold; cursor: pointer; border-radius: 16px; font-family: monospace; margin-top: 8px; letter-spacing: 1px; transition: transform 0.2s ease; }
         .modal-content button:hover { transform: scale(1.03); }
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
@@ -349,7 +383,7 @@
             padding: 16px;
             border-radius: var(--bubble-radius);
             z-index: 9000;
-            box-shadow: 0 0 30px rgba(255, 0, 85, 0.6);
+            box-shadow: 0 0 30px rgba(255, 0, 85, 0.4);
             backdrop-filter: blur(12px);
             font-family: monospace;
             color: #ffffff;
@@ -392,7 +426,7 @@
             padding: 20px;
             border-radius: var(--bubble-radius);
             z-index: 8000;
-            box-shadow: 0 0 30px var(--neon-cyan-glow);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             backdrop-filter: blur(12px);
             font-family: monospace;
             color: var(--text-main);
@@ -429,13 +463,13 @@
         }
         #cookie-accept-btn {
             background: var(--gradient-primary);
-            color: #000;
+            color: #ffffff;
             box-shadow: 0 0 10px var(--neon-cyan-glow);
         }
         #cookie-reject-btn {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(128, 128, 128, 0.1);
             color: var(--text-main);
-            border: 1px solid rgba(0, 243, 255, 0.3);
+            border: 1px solid rgba(128, 128, 128, 0.3);
         }
         .cookie-btn:hover { transform: scale(1.03); }
 
@@ -445,13 +479,13 @@
             position: fixed;
             top: 0; left: 0;
             width: 100vw; height: 100vh;
-            background: rgba(0, 0, 0, 0.88);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 6000;
             justify-content: center;
             align-items: center;
             padding: 20px;
             box-sizing: border-box;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(8px);
         }
         .permission-box {
             background: var(--panel-bg);
@@ -463,7 +497,7 @@
             border-radius: var(--bubble-radius);
             width: 340px;
             text-align: center;
-            box-shadow: 0 0 50px var(--neon-cyan-glow);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
             color: var(--text-main);
             font-family: monospace;
         }
@@ -813,10 +847,10 @@
         <div class="section-divider"></div>
 
         <b>BASE CATEGORIES:</b><br><br>
-        <label><input type="checkbox" value="stations" class="cat-box"> Space Stations</label>
-        <label><input type="checkbox" value="visual" class="cat-box"> Brightest / Visual</label>
-        <label><input type="checkbox" value="starlink" class="cat-box"> Starlink Network</label>
-        <label><input type="checkbox" value="weather" class="cat-box"> Weather & Earth Systems</label>
+        <label><input type="checkbox" value="stations" class="cat-box" checked> Space Stations</label>
+        <label><input type="checkbox" value="visual" class="cat-box" checked> Brightest / Visual</label>
+        <label><input type="checkbox" value="starlink" class="cat-box" checked> Starlink Network</label>
+        <label><input type="checkbox" value="weather" class="cat-box" checked> Weather & Earth Systems</label>
         <label><input type="checkbox" value="active" class="cat-box" checked> 🌐 Global Active Constellation</label>
 
         <div class="section-divider"></div>
@@ -857,15 +891,24 @@
         </div>
 
         <button id="apply-sliders-btn" class="action-btn">APPLY FILTER SLIDERS</button>
-        <button id="reset-sliders-btn" class="action-btn" style="background: rgba(255,255,255,0.1); color: var(--text-main);">RESET SLIDERS</button>
+        <button id="reset-sliders-btn" class="action-btn" style="background: rgba(128,128,128,0.15); color: var(--text-main);">RESET SLIDERS</button>
     </div>
 
     <div id="controls">
+        <b>PERFORMANCE MODE:</b><br><br>
+        <select id="perf-mode-select">
+            <option value="high">High Performance</option>
+            <option value="normal" selected>Normal Mode</option>
+            <option value="potato">Potato Mode</option>
+        </select>
+
+        <div class="section-divider"></div>
+
         <b>CARTOGRAPHY THEME:</b><br><br>
         <select id="theme-select">
-            <option value="dark" selected>Deep Space Dark Vector</option>
-            <option value="terrain">Satellite Imagery Matrix</option>
-            <option value="light">High-Contrast Light Vector</option>
+            <option value="dark" selected>Dark Mode</option>
+            <option value="terrain">Hybrid Terrain Mode</option>
+            <option value="light">Light Mode</option>
         </select>
 
         <div class="section-divider"></div>
@@ -957,10 +1000,15 @@
             renderer: canvasRenderer
         }).setView([0, 0], 2);
 
+        // Hybrid theme group setup using Leaflet layer groups for borders/labels over satellite imagery
+        const terrainBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, minZoom: 2, noWrap: false });
+        const terrainOverlayLayer = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, minZoom: 2, noWrap: false });
+        const hybridTerrainGroup = L.layerGroup([terrainBaseLayer, terrainOverlayLayer]);
+
         const themes = {
-            dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-            terrain: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+            dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, minZoom: 2, noWrap: false, renderer: canvasRenderer }),
+            terrain: hybridTerrainGroup,
+            light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, minZoom: 2, noWrap: false, renderer: canvasRenderer })
         };
 
         // Restore Theme from Cookie/LocalStorage if available[cite: 6]
@@ -970,12 +1018,7 @@
             document.body.classList.add('light-theme');
         }
 
-        let currentTileLayer = L.tileLayer(themes[savedTheme] || themes.dark, {
-            maxZoom: 18,
-            minZoom: 2,
-            noWrap: false,
-            renderer: canvasRenderer
-        }).addTo(map);
+        let currentTileLayer = (themes[savedTheme] || themes.dark).addTo(map);
 
         document.getElementById('theme-select').addEventListener('change', (e) => {
             const selectedTheme = e.target.value;
@@ -989,12 +1032,25 @@
 
             if (themes[selectedTheme]) {
                 map.removeLayer(currentTileLayer);
-                currentTileLayer = L.tileLayer(themes[selectedTheme], {
-                    maxZoom: 18,
-                    minZoom: 2,
-                    noWrap: false,
-                    renderer: canvasRenderer
-                }).addTo(map);
+                currentTileLayer = themes[selectedTheme].addTo(map);
+            }
+        });
+
+        // Performance Mode Setting Setup
+        let currentPerfMode = localStorage.getItem('sat_perf_mode') || 'normal';
+        document.getElementById('perf-mode-select').value = currentPerfMode;
+
+        document.getElementById('perf-mode-select').addEventListener('change', (e) => {
+            currentPerfMode = e.target.value;
+            localStorage.setItem('sat_perf_mode', currentPerfMode);
+            statusDiv.innerText = `PERFORMANCE MODE SET TO: ${currentPerfMode.toUpperCase()}`;
+            
+            // High mode unhides and loads hidden/additional satellite categories automatically
+            if (currentPerfMode === 'high') {
+                document.querySelectorAll('.cat-box').forEach(box => {
+                    box.checked = true;
+                    loadCategory(box.value);
+                });
             }
         });
 
@@ -1010,7 +1066,6 @@
         let userLocationMarker = null;
         let userRangeCircle = null;
 
-        // Position handling adjusted so it doesn't force continuous 'watchPosition', using single prompt check
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 (position) => {
@@ -1496,7 +1551,6 @@
             selectedTracker = null;
         }
 
-        // --- AR PERMISSIONS & LOGIC ---
         let arActive = false;
         let deviceHeading = 0;
         let devicePitch = 0;
@@ -1615,7 +1669,6 @@
             window.removeEventListener('deviceorientation', handleOrientation, true);
         });
 
-        // Toggle visibility for the AR Range control panel via button under text
         const arTogglePanelBtn = document.getElementById('ar-toggle-panel-btn');
         const arCalibrationPanel = document.getElementById('ar-calibration');
 
@@ -1701,13 +1754,22 @@
             let frameCount = 0;
             function loop() {
                 frameCount++;
-                if (frameCount % 4 === 0 && allTrackers.length > 0) {
+                
+                let frameInterval = 4; 
+                if (currentPerfMode === 'high') {
+                    frameInterval = 1; 
+                } else if (currentPerfMode === 'potato') {
+                    frameInterval = 6; 
+                }
+
+                if (frameCount % frameInterval === 0 && allTrackers.length > 0) {
                     const now = new Date();
                     const nowMs = now.getTime();
                     const gmst = satellite.gstime(now);
                     const currentZoom = map.getZoom();
                     const bounds = map.getBounds();
-                    const useDetailedIcons = currentZoom >= 6;
+                    
+                    const useDetailedIcons = currentZoom >= 6 && currentPerfMode !== 'potato';
 
                     let forceDotsDueToDensity = false;
                     if (useDetailedIcons) {
@@ -1724,7 +1786,19 @@
                     }
 
                     let skipFactor = 1;
-                    if (!useDetailedIcons) {
+                    if (currentPerfMode === 'high') {
+                        // High Performance: always render every tracked satellite, regardless of zoom.
+                        skipFactor = 1;
+                    } else if (currentPerfMode === 'potato') {
+                        // Potato Mode: show very few satellites at whole-map zoom levels (where the
+                        // sheer count would lag weaker devices most), and progressively reveal more
+                        // as the user zooms in, until showing everything once zoomed in close.
+                        if (currentZoom <= 2) skipFactor = 12;
+                        else if (currentZoom === 3) skipFactor = 8;
+                        else if (currentZoom === 4) skipFactor = 4;
+                        else if (currentZoom === 5) skipFactor = 2;
+                        else skipFactor = 1;
+                    } else if (!useDetailedIcons) {
                         if (currentZoom <= 3) skipFactor = 3;
                         else if (currentZoom === 4) skipFactor = 2;
                     }
@@ -1768,7 +1842,19 @@
                                 }
 
                                 if (targetRepresentation === 'dot') {
+                                    let dynamicRadius = 2;
+                                    if (currentPerfMode === 'potato') {
+                                        if (currentZoom >= 6) {
+                                            dynamicRadius = Math.max(6, currentZoom + 2);
+                                        } else {
+                                            dynamicRadius = 2;
+                                        }
+                                    } else {
+                                        dynamicRadius = Math.max(2, currentZoom);
+                                    }
+                                    tracker.dotMarker.setRadius(dynamicRadius);
                                     tracker.dotMarker.setLatLng(latLng);
+                                    
                                     if (!tracker.isVisible) { tracker.dotMarker.addTo(map); tracker.isVisible = true; }
                                 } else {
                                     if (!tracker.customIconMarker) {
@@ -1807,7 +1893,12 @@
         });
 
         startMasterAnimationLoop();
+        
         loadCategory('active');
+        loadCategory('stations');
+        loadCategory('visual');
+        loadCategory('starlink');
+        loadCategory('weather');
     </script>
 </body>
 </html>
