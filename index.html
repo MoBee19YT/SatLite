@@ -978,6 +978,36 @@
             pointer-events: none;
             transform: translateY(-10px);
         }
+        /* Minimal mode leaves only the close button and satellite labels. */
+        #ar-view.minimal-ui #ar-crosshair,
+        #ar-view.minimal-ui .ar-edge-indicator,
+        #ar-view.minimal-ui #ar-compass-readout,
+        #ar-view.minimal-ui #ar-status-text { display: none; }
+        #ar-sat-info-card {
+            display: none;
+            position: absolute;
+            left: 50%; bottom: 24px;
+            transform: translateX(-50%);
+            z-index: 5200;
+            width: min(290px, calc(100vw - 48px));
+            box-sizing: border-box;
+            background: rgba(0, 0, 0, 0.80);
+            color: #fff;
+            border: 1px solid rgba(0, 243, 255, 0.65);
+            border-radius: 14px;
+            padding: 10px 36px 10px 12px;
+            box-shadow: 0 0 18px rgba(0, 243, 255, 0.20);
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+        #ar-sat-info-card.visible { display: block; }
+        #ar-sat-info-name { color: var(--neon-cyan); font-size: 12px; font-weight: bold; }
+        #ar-sat-info-details { margin-top: 4px; color: #d9faff; font-size: 10px; line-height: 1.45; }
+        #ar-sat-info-close {
+            position: absolute; top: 6px; right: 8px;
+            background: transparent; border: 0; color: #fff;
+            font-size: 18px; line-height: 1; cursor: pointer;
+        }
         .ar-range-slider-container {
             width: 100%;
             display: flex;
@@ -1083,6 +1113,12 @@
 
         <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">â€¹</span><span class="ar-edge-count">0</span></div>
         <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">â€º</span></div>
+
+        <div id="ar-sat-info-card" role="status">
+            <button id="ar-sat-info-close" aria-label="Close satellite details">×</button>
+            <div id="ar-sat-info-name"></div>
+            <div id="ar-sat-info-details"></div>
+        </div>
 
         <div id="ar-hud">
             <div id="ar-status-container">
@@ -2572,17 +2608,31 @@
 
         function handleOrientation(event) {
             let heading = null;
+            const screenAngle = getScreenAngle();
             if (typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)) {
                 heading = event.webkitCompassHeading; // iOS Safari: already true-north relative, most reliable source
             } else if (event.alpha !== null) {
                 heading = 360 - event.alpha; // Android absolute orientation / best-effort fallback
             }
             if (heading !== null) {
-                rawHeading = (heading + headingCalibrationOffset + 360) % 360;
+                // Correct for portrait/landscape rotation so labels do not drift
+                // when the phone is turned sideways.
+                rawHeading = (heading + screenAngle + headingCalibrationOffset + 360) % 360;
             }
-            if (event.beta !== null) {
-                rawPitch = event.beta - 90; // approx elevation angle when phone is held vertically, camera facing outward
+            if (event.beta !== null && event.gamma !== null) {
+                // In landscape, gamma becomes the forward/back tilt axis.
+                if (screenAngle === 90) rawPitch = event.gamma - 90;
+                else if (screenAngle === 270) rawPitch = -event.gamma - 90;
+                else if (screenAngle === 180) rawPitch = -event.beta - 90;
+                else rawPitch = event.beta - 90;
             }
+        }
+
+        function getScreenAngle() {
+            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
+                ? screen.orientation.angle
+                : (typeof window.orientation === 'number' ? window.orientation : 0);
+            return ((angle % 360) + 360) % 360;
         }
 
         // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
@@ -2610,6 +2660,8 @@
 
         const arTogglePanelBtn = document.getElementById('ar-toggle-panel-btn');
         const arCalibrationPanel = document.getElementById('ar-calibration');
+        const arViewElement = document.getElementById('ar-view');
+        const arSatInfoCard = document.getElementById('ar-sat-info-card');
 
         arTogglePanelBtn.addEventListener('click', () => {
             arCalibrationPanel.classList.toggle('collapsed');
@@ -2619,6 +2671,25 @@
                 arTogglePanelBtn.innerText = 'âš™ HIDE RANGE CONTROL';
             }
         });
+
+        // The existing button hides the range panel. Make that state a genuinely
+        // quieter AR mode by also hiding non-essential aiming/HUD decorations.
+        arTogglePanelBtn.addEventListener('click', () => {
+            const controlsHidden = arCalibrationPanel.classList.contains('collapsed');
+            arViewElement.classList.toggle('minimal-ui', controlsHidden);
+            arTogglePanelBtn.innerText = controlsHidden ? 'SHOW CONTROLS' : 'HIDE CONTROLS';
+        });
+
+        document.getElementById('ar-sat-info-close').addEventListener('click', () => {
+            arSatInfoCard.classList.remove('visible');
+        });
+
+        function showARInfo(tracker, rangeKm, elevation) {
+            document.getElementById('ar-sat-info-name').innerText = tracker.name;
+            document.getElementById('ar-sat-info-details').innerText =
+                `${tracker.specificType.toUpperCase()} · ${rangeKm.toFixed(0)} km away · ${elevation.toFixed(0)}° elevation`;
+            arSatInfoCard.classList.add('visible');
+        }
 
         // Periodic coarse scan across the whole loaded catalog to find which satellites
         // are even roughly within range. This is the only place that touches every
@@ -2747,8 +2818,11 @@
                             <div class="ar-marker-distance"></div>
                         `;
                         markerEl.addEventListener('click', () => {
-                            selectSatellite({ stopPropagation: () => {} }, tracker);
-                            document.getElementById('ar-close-btn').click();
+                            showARInfo(
+                                tracker,
+                                Number(markerEl.dataset.rangeKm),
+                                Number(markerEl.dataset.elevation)
+                            );
                         });
                         markerLayer.appendChild(markerEl);
                         arMarkerElements.set(tracker.noradId, markerEl);
@@ -2756,6 +2830,8 @@
 
                     markerEl.style.left = `${screenX}px`;
                     markerEl.style.top = `${screenY}px`;
+                    markerEl.dataset.rangeKm = rangeKm;
+                    markerEl.dataset.elevation = elevation;
                     markerEl.classList.toggle('ar-marker-selected', tracker === selectedTracker);
 
                     const dot = markerEl.querySelector('.ar-marker-dot');
@@ -2898,6 +2974,13 @@
                                         });
                                         tracker.customIconMarker = L.marker(latLng, { icon: customDivIcon });
                                         tracker.customIconMarker.on('click', (e) => { selectSatellite(e, tracker); });
+                                        map.addLayer(tracker.customIconMarker);
+                                        tracker.isVisible = true;
+                                    } else if (!tracker.isVisible) {
+                                        // A detailed marker may already exist but have
+                                        // been removed while switching zoom levels. Put
+                                        // it back before only updating its position.
+                                        tracker.customIconMarker.setLatLng(latLng);
                                         map.addLayer(tracker.customIconMarker);
                                         tracker.isVisible = true;
                                     } else {
