@@ -2542,6 +2542,11 @@
         function startARWorkflow() {
             const arView = document.getElementById('ar-view');
             const arStatusText = document.getElementById('ar-status-text');
+            // AR is calibrated for portrait. Locking when the browser permits it
+            // prevents a screen rotation from changing the sensor axes mid-session.
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('portrait').catch(() => {});
+            }
             // Make feedback visible immediately. Previously the status lived in a
             // hidden AR view until both location and camera access had succeeded.
             arView.style.display = 'block';
@@ -2608,31 +2613,17 @@
 
         function handleOrientation(event) {
             let heading = null;
-            const screenAngle = getScreenAngle();
             if (typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)) {
                 heading = event.webkitCompassHeading; // iOS Safari: already true-north relative, most reliable source
             } else if (event.alpha !== null) {
                 heading = 360 - event.alpha; // Android absolute orientation / best-effort fallback
             }
             if (heading !== null) {
-                // Correct for portrait/landscape rotation so labels do not drift
-                // when the phone is turned sideways.
-                rawHeading = (heading + screenAngle + headingCalibrationOffset + 360) % 360;
+                rawHeading = (heading + headingCalibrationOffset + 360) % 360;
             }
-            if (event.beta !== null && event.gamma !== null) {
-                // In landscape, gamma becomes the forward/back tilt axis.
-                if (screenAngle === 90) rawPitch = event.gamma - 90;
-                else if (screenAngle === 270) rawPitch = -event.gamma - 90;
-                else if (screenAngle === 180) rawPitch = -event.beta - 90;
-                else rawPitch = event.beta - 90;
+            if (event.beta !== null) {
+                rawPitch = event.beta - 90;
             }
-        }
-
-        function getScreenAngle() {
-            const angle = (screen.orientation && typeof screen.orientation.angle === 'number')
-                ? screen.orientation.angle
-                : (typeof window.orientation === 'number' ? window.orientation : 0);
-            return ((angle % 360) + 360) % 360;
         }
 
         // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
@@ -2663,6 +2654,12 @@
         const arViewElement = document.getElementById('ar-view');
         const arSatInfoCard = document.getElementById('ar-sat-info-card');
 
+        // Use HTML entities / Unicode escapes here so AR controls remain readable
+        // even if a browser opens this file with a legacy text encoding.
+        document.getElementById('ar-close-btn').innerHTML = '&times;';
+        document.querySelector('#ar-edge-left .ar-edge-arrow').innerHTML = '&lsaquo;';
+        document.querySelector('#ar-edge-right .ar-edge-arrow').innerHTML = '&rsaquo;';
+
         arTogglePanelBtn.addEventListener('click', () => {
             arCalibrationPanel.classList.toggle('collapsed');
             if (arCalibrationPanel.classList.contains('collapsed')) {
@@ -2687,7 +2684,7 @@
         function showARInfo(tracker, rangeKm, elevation) {
             document.getElementById('ar-sat-info-name').innerText = tracker.name;
             document.getElementById('ar-sat-info-details').innerText =
-                `${tracker.specificType.toUpperCase()} · ${rangeKm.toFixed(0)} km away · ${elevation.toFixed(0)}° elevation`;
+                `${tracker.specificType.toUpperCase()} \u00B7 ${rangeKm.toFixed(0)} km away \u00B7 ${elevation.toFixed(0)}\u00B0 elevation`;
             arSatInfoCard.classList.add('visible');
         }
 
