@@ -2486,27 +2486,34 @@
         document.getElementById('grant-compass-btn').addEventListener('click', async () => {
             compassPermissionModal.style.display = 'none';
 
+            // Start the camera request immediately while this button press is still
+            // a trusted user action. Safari otherwise silently drops the request
+            // after an awaited compass/location permission prompt.
+            startARWorkflow();
+
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
                     const response = await DeviceOrientationEvent.requestPermission();
                     if (response !== 'granted') {
                         alert('Compass permission was denied. The camera will still open, but satellite labels cannot follow your phone direction.');
                     }
-                    // Keep going after a denial so the user gets a clear AR view
-                    // rather than a button that appears to do nothing.
-                    startARWorkflow();
                 } catch (e) {
                     console.error(e);
-                    startARWorkflow();
                 }
-            } else {
-                startARWorkflow();
             }
         });
 
         function startARWorkflow() {
+            const arView = document.getElementById('ar-view');
             const arStatusText = document.getElementById('ar-status-text');
+            // Make feedback visible immediately. Previously the status lived in a
+            // hidden AR view until both location and camera access had succeeded.
+            arView.style.display = 'block';
             arStatusText.innerText = `ACQUIRING POSITION FOR ${arMaxDistanceKm}KM AR RANGE...`;
+
+            // Do not wait for location before asking for the camera: mobile Safari
+            // requires this request to happen directly from the Grant button.
+            initCameraAndAR();
             
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -2514,16 +2521,14 @@
                         userLocation.lat = position.coords.latitude;
                         userLocation.lng = position.coords.longitude;
                         userLocation.alt = position.coords.altitude || 0;
-                        initCameraAndAR();
+                        arLastCandidateScan = 0;
                     },
                     (error) => {
                         arStatusText.innerText = `USING DEFAULT LOCATION FOR ${arMaxDistanceKm}KM AR`;
-                        initCameraAndAR();
+                        arLastCandidateScan = 0;
                     },
                     { enableHighAccuracy: false, timeout: 10000 }
                 );
-            } else {
-                initCameraAndAR();
             }
         }
 
