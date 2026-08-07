@@ -1029,7 +1029,7 @@
 
     <!-- Beta Version Overheating / Instability Warning Banner -->
     <div id="beta-warning-banner">
-        <h4>⚠️ BETA BUILD WARNING</h4>
+        <h4>âš ï¸ BETA BUILD WARNING</h4>
         <p>This is a <strong>beta version</strong>. Intense tracking loops or extended runtime may cause your device to overheat, and certain secondary features might temporarily break.</p>
         <button class="beta-dismiss-btn" id="dismiss-beta-banner">UNDERSTOOD</button>
     </div>
@@ -1081,35 +1081,35 @@
             <div class="ar-crosshair-tick ar-tick-right"></div>
         </div>
 
-        <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">‹</span><span class="ar-edge-count">0</span></div>
-        <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">›</span></div>
+        <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">â€¹</span><span class="ar-edge-count">0</span></div>
+        <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">â€º</span></div>
 
         <div id="ar-hud">
             <div id="ar-status-container">
                 <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
-                <div id="ar-compass-readout">HDG --- °</div>
-                <button id="ar-toggle-panel-btn">⚙ HIDE RANGE CONTROL</button>
+                <div id="ar-compass-readout">HDG --- Â°</div>
+                <button id="ar-toggle-panel-btn">âš™ HIDE RANGE CONTROL</button>
             </div>
-            <button id="ar-close-btn">✕</button>
+            <button id="ar-close-btn">âœ•</button>
         </div>
 
         <div id="ar-calibration">
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
                     <span>AR MAX DISTANCE</span>
-                    <span id="ar-range-val-display">100 KM</span>
+                    <span id="ar-range-val-display">1500 KM</span>
                 </div>
-                <input type="range" id="ar-distance-slider" min="10" max="500" value="100" step="10">
+                <input type="range" id="ar-distance-slider" min="100" max="3000" value="1500" step="50">
             </div>
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
                     <span>COMPASS CALIBRATION</span>
-                    <span id="ar-calibration-val-display">0°</span>
+                    <span id="ar-calibration-val-display">0Â°</span>
                 </div>
                 <div class="ar-calibration-btn-row">
-                    <button id="ar-calibrate-minus" class="ar-calibrate-btn">− 5°</button>
+                    <button id="ar-calibrate-minus" class="ar-calibrate-btn">âˆ’ 5Â°</button>
                     <button id="ar-calibrate-reset" class="ar-calibrate-btn">RESET</button>
-                    <button id="ar-calibrate-plus" class="ar-calibrate-btn">+ 5°</button>
+                    <button id="ar-calibrate-plus" class="ar-calibrate-btn">+ 5Â°</button>
                 </div>
             </div>
         </div>
@@ -1118,7 +1118,7 @@
     <div id="sat-info-panel">
         <div class="sat-info-header">
             <h3 id="panel-sat-name">TELEMETRY DATA FEED</h3>
-            <button id="panel-fav-btn" title="Toggle Favorite">☆</button>
+            <button id="panel-fav-btn" title="Toggle Favorite">â˜†</button>
         </div>
         <div class="sat-info-grid">
             <div>
@@ -1142,7 +1142,7 @@
     <div id="favorites-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; margin-bottom: 14px;">
             <h3 style="margin: 0; font-size: 15px; letter-spacing: 1px; color: var(--text-main);">FAVORITE SATELLITES</h3>
-            <button id="close-favorites-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold;">✕</button>
+            <button id="close-favorites-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold;">âœ•</button>
         </div>
         <div id="favorites-list-container">
             <p style="color: var(--text-dim); text-align: center; margin: 20px 0;">No favorite satellites saved yet.</p>
@@ -1185,7 +1185,7 @@
         <label><input type="checkbox" value="visual" class="cat-box" checked> Brightest / Visual</label>
         <label><input type="checkbox" value="starlink" class="cat-box" checked> Starlink Network</label>
         <label><input type="checkbox" value="weather" class="cat-box" checked> Weather & Earth Systems</label>
-        <label><input type="checkbox" value="active" class="cat-box" checked> 🌐 Global Active Constellation</label>
+        <label><input type="checkbox" value="active" class="cat-box" checked> ðŸŒ Global Active Constellation</label>
 
         <div class="section-divider"></div>
 
@@ -1204,8 +1204,8 @@
 
         <div class="range-slider-group">
             <div class="range-slider-label">
-                <span>Inclination Range (°)</span>
-                <span id="incl-val-display">0° - 180°</span>
+                <span>Inclination Range (Â°)</span>
+                <span id="incl-val-display">0Â° - 180Â°</span>
             </div>
             <div class="range-slider-wrapper">
                 <input type="range" id="min-incl-slider" min="0" max="180" value="0" step="1">
@@ -1865,7 +1865,7 @@
         }
 
         setupDualSlider('min-alt-slider', 'max-alt-slider', 'alt-val-display', 'km');
-        setupDualSlider('min-incl-slider', 'max-incl-slider', 'incl-val-display', '°');
+        setupDualSlider('min-incl-slider', 'max-incl-slider', 'incl-val-display', 'Â°');
         setupDualSlider('min-vel-slider', 'max-vel-slider', 'vel-val-display', 'km/s');
 
         document.getElementById('apply-sliders-btn').addEventListener('click', () => {
@@ -1901,7 +1901,7 @@
             document.getElementById('max-vel-slider').value = 15;
 
             document.getElementById('alt-val-display').innerText = '0 - 40000 km';
-            document.getElementById('incl-val-display').innerText = '0° - 180°';
+            document.getElementById('incl-val-display').innerText = '0Â° - 180Â°';
             document.getElementById('vel-val-display').innerText = '0 - 15 km/s';
 
             advancedFiltersActive = false;
@@ -2008,10 +2008,10 @@
             const favBtn = document.getElementById('panel-fav-btn');
             if (!favBtn) return;
             if (favoriteNoradIds.includes(tracker.noradId)) {
-                favBtn.innerText = '★';
+                favBtn.innerText = 'â˜…';
                 favBtn.style.color = 'var(--neon-cyan)';
             } else {
-                favBtn.innerText = '☆';
+                favBtn.innerText = 'â˜†';
                 favBtn.style.color = 'var(--text-dim)';
             }
         }
@@ -2055,7 +2055,7 @@
                     </div>
                     <div style="display: flex; gap: 6px;">
                         <button class="fav-track-btn" data-norad="${noradId}" style="background: var(--gradient-primary); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer; font-weight: bold;">VIEW</button>
-                        <button class="fav-remove-btn" data-norad="${noradId}" style="background: var(--neon-pink); color: #fff; border: none; padding: 6px 8px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer;">✕</button>
+                        <button class="fav-remove-btn" data-norad="${noradId}" style="background: var(--neon-pink); color: #fff; border: none; padding: 6px 8px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer;">âœ•</button>
                     </div>
                 `;
                 container.appendChild(item);
@@ -2331,11 +2331,11 @@
             document.getElementById('panel-sat-name').innerText = tracker.name;
             document.getElementById('panel-norad').innerText = tracker.noradId;
             document.getElementById('panel-type').innerText = tracker.specificType.toUpperCase();
-            document.getElementById('panel-lat').innerText = tracker.lat.toFixed(2) + '°';
-            document.getElementById('panel-lng').innerText = tracker.lng.toFixed(2) + '°';
+            document.getElementById('panel-lat').innerText = tracker.lat.toFixed(2) + 'Â°';
+            document.getElementById('panel-lng').innerText = tracker.lng.toFixed(2) + 'Â°';
             document.getElementById('panel-alt').innerText = tracker.alt.toFixed(1) + ' km';
             document.getElementById('panel-vel').innerText = tracker.vel.toFixed(2) + ' km/s';
-            document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + '°';
+            document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + 'Â°';
             document.getElementById('panel-ecc').innerText = tracker.eccentricity.toFixed(6);
 
             updateFavoriteButtonState(tracker);
@@ -2394,7 +2394,7 @@
             selectedTracker = null;
         }
 
-        // This was completely missing — clicking empty map space did nothing,
+        // This was completely missing â€” clicking empty map space did nothing,
         // so there was no way to deselect a satellite or dismiss open panels
         // except by picking another satellite or re-opening the same panel.
         map.on('click', () => {
@@ -2406,10 +2406,12 @@
         });
 
         let arActive = false;
-        let arMaxDistanceKm = 100;
+        // LEO satellites are normally 400â€“1,500 km away. A 100 km default
+        // meant the AR view could never show any of them.
+        let arMaxDistanceKm = 1500;
         let arStream = null;
 
-        // Raw sensor readings vs. smoothed values actually used for rendering —
+        // Raw sensor readings vs. smoothed values actually used for rendering â€”
         // smoothing kills the jitter you'd otherwise see from noisy phone sensors.
         let rawHeading = 0;
         let rawPitch = 0;
@@ -2424,8 +2426,8 @@
         let arLastCandidateScan = 0;
         const AR_CANDIDATE_RESCAN_MS = 1000;
 
-        const AR_FOV_H = 70; // degrees — typical rear camera horizontal FOV
-        const AR_FOV_V = 55; // degrees — narrower vertically for a portrait screen
+        const AR_FOV_H = 70; // degrees â€” typical rear camera horizontal FOV
+        const AR_FOV_V = 55; // degrees â€” narrower vertically for a portrait screen
 
         const arMarkerElements = new Map(); // noradId -> DOM element, reused across frames instead of rebuilt
 
@@ -2441,7 +2443,7 @@
 
         const arCalibrationValDisplay = document.getElementById('ar-calibration-val-display');
         function updateCalibrationDisplay() {
-            arCalibrationValDisplay.innerText = `${headingCalibrationOffset > 0 ? '+' : ''}${headingCalibrationOffset}°`;
+            arCalibrationValDisplay.innerText = `${headingCalibrationOffset > 0 ? '+' : ''}${headingCalibrationOffset}Â°`;
         }
         updateCalibrationDisplay();
 
@@ -2465,6 +2467,14 @@
 
         if (arToggleBtn) {
             arToggleBtn.addEventListener('click', () => {
+                if (!window.isSecureContext) {
+                    alert('AR needs a secure page. Open SatLite through HTTPS or http://localhost â€” it cannot use the camera from a file:// URL.');
+                    return;
+                }
+                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                    alert('This browser does not provide camera access for AR. Try the latest Safari or Chrome on your phone.');
+                    return;
+                }
                 compassPermissionModal.style.display = 'flex';
             });
         }
@@ -2479,11 +2489,12 @@
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
                 try {
                     const response = await DeviceOrientationEvent.requestPermission();
-                    if (response === 'granted') {
-                        startARWorkflow();
-                    } else {
-                        alert("Compass permission was denied. AR sky tracking orientation may not function properly.");
+                    if (response !== 'granted') {
+                        alert('Compass permission was denied. The camera will still open, but satellite labels cannot follow your phone direction.');
                     }
+                    // Keep going after a denial so the user gets a clear AR view
+                    // rather than a button that appears to do nothing.
+                    startARWorkflow();
                 } catch (e) {
                     console.error(e);
                     startARWorkflow();
@@ -2524,11 +2535,14 @@
             arStatusText.innerText = "ACTIVATING OPTICAL SENSOR...";
 
             try {
+                // "ideal" permits phones/browsers without a named rear camera to
+                // fall back gracefully instead of rejecting the whole AR session.
                 arStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' },
+                    video: { facingMode: { ideal: 'environment' } },
                     audio: false
                 });
                 arVideo.srcObject = arStream;
+                await arVideo.play();
                 arView.style.display = 'block';
                 arActive = true;
                 arToggleBtn.classList.add('ar-toggle-btn-active');
@@ -2546,7 +2560,7 @@
                 arLastCandidateScan = 0;
                 startARLoop();
             } catch (err) {
-                arStatusText.innerText = "CAMERA ACCESS DENIED";
+                arStatusText.innerText = 'CAMERA UNAVAILABLE â€” CHECK HTTPS AND PERMISSIONS';
                 console.error(err);
             }
         }
@@ -2566,7 +2580,7 @@
             }
         }
 
-        // Circular-safe smoothing so headings don't jump wildly across the 0°/360° seam.
+        // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
         function smoothAngle(current, target, factor) {
             let diff = ((target - current + 540) % 360) - 180;
             return (current + diff * factor + 360) % 360;
@@ -2595,15 +2609,15 @@
         arTogglePanelBtn.addEventListener('click', () => {
             arCalibrationPanel.classList.toggle('collapsed');
             if (arCalibrationPanel.classList.contains('collapsed')) {
-                arTogglePanelBtn.innerText = '⚙ SHOW RANGE CONTROL';
+                arTogglePanelBtn.innerText = 'âš™ SHOW RANGE CONTROL';
             } else {
-                arTogglePanelBtn.innerText = '⚙ HIDE RANGE CONTROL';
+                arTogglePanelBtn.innerText = 'âš™ HIDE RANGE CONTROL';
             }
         });
 
         // Periodic coarse scan across the whole loaded catalog to find which satellites
         // are even roughly within range. This is the only place that touches every
-        // tracked satellite, and it only runs once a second — not every frame — which is
+        // tracked satellite, and it only runs once a second â€” not every frame â€” which is
         // what makes the AR view fast even with thousands of satellites loaded.
         function rescanARCandidates(now) {
             const gmst = satellite.gstime(now);
@@ -2617,13 +2631,16 @@
                 const lat = satellite.degreesLat(geo.latitude);
                 const lng = satellite.degreesLong(geo.longitude);
 
-                // Cheap flat-earth ground-distance estimate — just for this coarse
+                // Cheap flat-earth ground-distance estimate â€” just for this coarse
                 // prefilter. Precise slant-range filtering happens every frame below.
                 const dLatKm = (lat - userLocation.lat) * 111;
                 const dLngKm = (lng - userLocation.lng) * 111 * cosLat;
                 const roughDistKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
 
-                if (roughDistKm < arMaxDistanceKm + geo.height) {
+                // This is deliberately generous: it only rejects satellites that
+                // cannot possibly be in range. The exact slant-range check runs
+                // below, so horizon satellites are not accidentally skipped.
+                if (roughDistKm < arMaxDistanceKm + geo.height + 200) {
                     candidates.push(tracker);
                 }
             }
@@ -2655,7 +2672,7 @@
 
                 smoothedHeading = smoothAngle(smoothedHeading, rawHeading, 0.15);
                 smoothedPitch += (rawPitch - smoothedPitch) * 0.15;
-                compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')}°`;
+                compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')}Â°`;
 
                 const gmst = satellite.gstime(now);
                 const observerGd = {
@@ -2674,7 +2691,7 @@
                     const pv = satellite.propagate(tracker.satrec, now);
                     if (!pv.position) return;
 
-                    // Real azimuth/elevation via satellite.js — accounts for Earth's
+                    // Real azimuth/elevation via satellite.js â€” accounts for Earth's
                     // curvature and observer position correctly, unlike a flat-earth
                     // atan2(altitude, ground_distance) approximation.
                     const positionEcf = satellite.eciToEcf(pv.position, gmst);
@@ -2695,7 +2712,7 @@
 
                     if (!inFov) {
                         removeARMarker(tracker.noradId);
-                        // Only count things roughly at eye level as "off to the side" —
+                        // Only count things roughly at eye level as "off to the side" â€”
                         // ignore satellites way above/below where a side arrow wouldn't help.
                         if (Math.abs(relElevation) < AR_FOV_V) {
                             if (relAzimuth < 0) offscreenLeftCount++;
@@ -2744,8 +2761,8 @@
                     dot.style.opacity = opacity;
                     dot.style.border = `2px solid ${typeColor}`;
 
-                    markerEl.querySelector('.ar-marker-label').innerText = `${tracker.name} · ${tracker.specificType.toUpperCase()}`;
-                    markerEl.querySelector('.ar-marker-distance').innerText = `${rangeKm.toFixed(0)} KM · ${elevation.toFixed(0)}° ELEV`;
+                    markerEl.querySelector('.ar-marker-label').innerText = `${tracker.name} Â· ${tracker.specificType.toUpperCase()}`;
+                    markerEl.querySelector('.ar-marker-distance').innerText = `${rangeKm.toFixed(0)} KM Â· ${elevation.toFixed(0)}Â° ELEV`;
                 });
 
                 // Clean up markers for anything that dropped out of the candidate list entirely
@@ -2906,3 +2923,4 @@
     </script>
 </body>
 </html>
+
