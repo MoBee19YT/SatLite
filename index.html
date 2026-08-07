@@ -35,7 +35,88 @@
         /* Make search box placeholder white specifically in Light Mode */
         body.light-theme #search-box::placeholder {
             color: #ffffff;
-            opacity: 1; /* Ensures full white opacity across different browsers */
+            opacity: 1;
+        }
+
+        /* ===================== UI Color Themes ===================== */
+        body.theme-cyberpunk {
+            --bg-deep: #0a0014;
+            --panel-bg: rgba(20, 4, 40, 0.95);
+            --gradient-primary: linear-gradient(135deg, #ff2bd6 0%, #7b2ff7 100%);
+            --neon-cyan: #ff2bd6;
+            --neon-cyan-glow: rgba(255, 43, 214, 0.4);
+            --neon-pink: #7b2ff7;
+            --text-main: #ffffff;
+            --text-dim: #f0d0ff;
+            --border-color: rgba(255, 43, 214, 0.8);
+        }
+
+        body.theme-solarized {
+            --bg-deep: #002b36;
+            --panel-bg: rgba(7, 54, 66, 0.95);
+            --gradient-primary: linear-gradient(135deg, #268bd2 0%, #2aa198 100%);
+            --neon-cyan: #2aa198;
+            --neon-cyan-glow: rgba(42, 161, 152, 0.35);
+            --neon-pink: #cb4b16;
+            --text-main: #eee8d5;
+            --text-dim: #93a1a1;
+            --border-color: rgba(147, 161, 161, 0.6);
+        }
+
+        body.theme-military {
+            --bg-deep: #030a03;
+            --panel-bg: rgba(4, 18, 4, 0.95);
+            --gradient-primary: linear-gradient(135deg, #00ff41 0%, #00b32d 100%);
+            --neon-cyan: #00ff41;
+            --neon-cyan-glow: rgba(0, 255, 65, 0.35);
+            --neon-pink: #ff4400;
+            --text-main: #baffc9;
+            --text-dim: #5fbf5f;
+            --border-color: rgba(0, 255, 65, 0.7);
+        }
+
+        body.theme-amber {
+            --bg-deep: #0d0700;
+            --panel-bg: rgba(20, 12, 0, 0.95);
+            --gradient-primary: linear-gradient(135deg, #ffb000 0%, #ff8800 100%);
+            --neon-cyan: #ffb000;
+            --neon-cyan-glow: rgba(255, 176, 0, 0.35);
+            --neon-pink: #ff3300;
+            --text-main: #ffcc66;
+            --text-dim: #cc8f33;
+            --border-color: rgba(255, 176, 0, 0.7);
+        }
+
+        body.theme-arctic {
+            --bg-deep: #eaf6fb;
+            --panel-bg: rgba(255, 255, 255, 0.96);
+            --gradient-primary: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+            --neon-cyan: #0ea5e9;
+            --neon-cyan-glow: rgba(56, 189, 248, 0.3);
+            --neon-pink: #f472b6;
+            --text-main: #0c4a6e;
+            --text-dim: #3b7ea1;
+            --border-color: rgba(56, 189, 248, 0.55);
+        }
+
+        body.theme-arctic #search-box::placeholder {
+            color: #ffffff;
+            opacity: 1;
+        }
+        body.theme-arctic #theme-select,
+        body.theme-arctic #perf-mode-select,
+        body.theme-arctic #color-theme-select,
+        body.theme-arctic #saved-custom-themes-select {
+            background: var(--gradient-primary);
+            border: none;
+            color: #ffffff;
+        }
+        body.theme-arctic #theme-select option,
+        body.theme-arctic #perf-mode-select option,
+        body.theme-arctic #color-theme-select option,
+        body.theme-arctic #saved-custom-themes-select option {
+            background-color: #0c4a6e;
+            color: #ffffff;
         }
 
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: var(--bg-deep); color: var(--text-main); font-family: 'Courier New', Courier, monospace; overflow: hidden; transition: background 0.3s ease, color 0.3s ease; }
@@ -106,7 +187,7 @@
             backdrop-filter: blur(10px);
         }
 
-        #controls, #filters-panel { 
+        #controls, #filters-panel, #favorites-panel { 
             position: absolute; 
             top: 20px; 
             right: 20px; 
@@ -171,7 +252,115 @@
         }
         .section-divider { border-top: 2px dashed rgba(128, 128, 128, 0.2); margin: 16px 0; padding-top: 4px; }
 
-        #theme-select, #perf-mode-select { 
+        .settings-tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 16px;
+            border-bottom: 1px solid rgba(128, 128, 128, 0.3);
+            padding-bottom: 8px;
+        }
+        .settings-tab-btn {
+            flex: 1;
+            background: rgba(128, 128, 128, 0.1);
+            border: 1px solid rgba(128, 128, 128, 0.2);
+            color: var(--text-main);
+            padding: 8px 4px;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .settings-tab-btn.active {
+            background: var(--gradient-primary);
+            color: #ffffff;
+            border-color: transparent;
+            box-shadow: 0 0 10px var(--neon-cyan-glow);
+        }
+        .settings-tab-content {
+            display: none;
+        }
+        .settings-tab-content.active {
+            display: block;
+        }
+
+        .color-picker-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 11px;
+            color: var(--text-main);
+        }
+        .color-picker-row input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid rgba(128, 128, 128, 0.4);
+            border-radius: 6px;
+            width: 34px;
+            height: 26px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+        .color-picker-row input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .color-picker-row input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+
+        /* Rounded box with gradient outline and icon preview for satellite icon colors */
+        .sat-preview-card {
+            background: var(--panel-bg);
+            border: double 2px transparent;
+            background-image: linear-gradient(var(--panel-bg), var(--panel-bg)), var(--gradient-primary);
+            background-origin: border-box;
+            background-clip: padding-box, border-box;
+            border-radius: 16px;
+            padding: 10px 14px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            backdrop-filter: blur(10px);
+        }
+        .sat-preview-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+        .sat-preview-icon-box {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sat-preview-card input[type="color"] {
+            -webkit-appearance: none;
+            border: 1px solid rgba(128, 128, 128, 0.4);
+            border-radius: 6px;
+            width: 34px;
+            height: 26px;
+            cursor: pointer;
+            background: transparent;
+            padding: 0;
+        }
+        .sat-preview-card input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+        .sat-preview-card input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 5px;
+        }
+
+        #theme-select, #perf-mode-select, #color-theme-select, #saved-custom-themes-select { 
             width: 100%; 
             box-sizing: border-box; 
             background: rgba(128, 128, 128, 0.08); 
@@ -191,29 +380,32 @@
             -moz-appearance: none;
         }
 
-        /* Light Mode: render these as a solid gradient pill (matching .action-btn's
-           look elsewhere in the app) with text forced white — without this, the
-           closed select's text follows --text-main, which is dark in light mode
-           and unreadable against the blue fill. */
         body.light-theme #theme-select,
-        body.light-theme #perf-mode-select {
+        body.light-theme #perf-mode-select,
+        body.light-theme #color-theme-select,
+        body.light-theme #saved-custom-themes-select {
             background: var(--gradient-primary);
             border: none;
             color: #ffffff;
         }
 
-        /* Explicit Styling for Dropdown Options (Dark Mode / Default) */
-        #theme-select option, #perf-mode-select option {
+        #theme-select option, #perf-mode-select option, #color-theme-select option, #saved-custom-themes-select option {
             background-color: #060c18;
             color: #ffffff;
         }
 
-        /* Explicit Styling for Dropdown Options (Light Mode - White Text) */
         body.light-theme #theme-select option, 
-        body.light-theme #perf-mode-select option {
+        body.light-theme #perf-mode-select option,
+        body.light-theme #color-theme-select option,
+        body.light-theme #saved-custom-themes-select option {
             background-color: #1e293b;
             color: #ffffff;
         }
+
+        body.theme-cyberpunk #color-theme-select option, body.theme-cyberpunk #saved-custom-themes-select option { background-color: #140428; color: #ffffff; }
+        body.theme-solarized #color-theme-select option, body.theme-solarized #saved-custom-themes-select option { background-color: #073642; color: #eee8d5; }
+        body.theme-military #color-theme-select option, body.theme-military #saved-custom-themes-select option { background-color: #041204; color: #baffc9; }
+        body.theme-amber #color-theme-select option, body.theme-amber #saved-custom-themes-select option { background-color: #140c00; color: #ffcc66; }
 
         .range-slider-group {
             margin-bottom: 14px;
@@ -342,7 +534,27 @@
             color: var(--text-main);
         }
 
-        #sat-info-panel h3 { color: var(--text-main); margin-top: 0; font-size: 15px; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; letter-spacing: 1px; }
+        .sat-info-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(128, 128, 128, 0.2);
+            padding-bottom: 10px;
+            margin-bottom: 14px;
+        }
+        #panel-sat-name { color: var(--text-main); margin: 0; font-size: 15px; letter-spacing: 1px; border: none; padding: 0; }
+        #panel-fav-btn {
+            background: transparent;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: var(--neon-cyan);
+            padding: 0;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+        #panel-fav-btn:hover { transform: scale(1.2); }
+
         .sat-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
         .sat-info-row { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(128,128,128,0.2); padding-bottom: 5px; color: var(--text-dim); }
         .sat-info-row span { color: var(--text-dim); }
@@ -371,7 +583,6 @@
         .modal-content button:hover { transform: scale(1.03); }
         .close-modal { background: var(--neon-pink) !important; color: #fff !important; }
 
-        /* ---------- BETA WARNING BANNER & COOKIE BANNER OVERLAY ---------- */
         #beta-warning-banner {
             position: fixed;
             top: 20px;
@@ -473,7 +684,6 @@
         }
         .cookie-btn:hover { transform: scale(1.03); }
 
-        /* ---------- PERMISSION OVERLAY MODAL ---------- */
         #compass-permission-modal {
             display: none;
             position: fixed;
@@ -523,7 +733,7 @@
             #status { top: 10px; left: 10px; right: 10px; font-size: 10px; text-align: center; border-radius: 18px; }
             #beta-warning-banner { top: 70px; left: 10px; right: 10px; max-width: none; }
             
-            #controls, #filters-panel { 
+            #controls, #filters-panel, #favorites-panel { 
                 top: auto; 
                 bottom: -100%; 
                 right: 0; 
@@ -534,7 +744,7 @@
                 transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
                 z-index: 3600; 
             }
-            #controls.mobile-open, #filters-panel.mobile-open { bottom: 0; display: block !important; }
+            #controls.mobile-open, #filters-panel.mobile-open, #favorites-panel.mobile-open { bottom: 0; display: block !important; }
 
             #sat-info-panel {
                 bottom: -100%;
@@ -548,7 +758,6 @@
             #sat-info-panel.panel-open { bottom: 0; display: block !important; }
         }
 
-        /* ---------- AR MODE ---------- */
         #ar-view {
             display: none;
             position: fixed;
@@ -606,6 +815,94 @@
             border: 1px solid rgba(255,255,255,0.5);
             border-radius: 50%;
             pointer-events: none;
+        }
+        .ar-crosshair-tick {
+            position: absolute;
+            background: rgba(255,255,255,0.6);
+        }
+        .ar-tick-top, .ar-tick-bottom { left: 50%; width: 1px; height: 8px; transform: translateX(-50%); }
+        .ar-tick-top { top: -14px; }
+        .ar-tick-bottom { bottom: -14px; }
+        .ar-tick-left, .ar-tick-right { top: 50%; height: 1px; width: 8px; transform: translateY(-50%); }
+        .ar-tick-left { left: -14px; }
+        .ar-tick-right { right: -14px; }
+
+        .ar-edge-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            padding: 10px 12px;
+            border-radius: 14px;
+            z-index: 5050;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .ar-edge-indicator.visible { opacity: 1; }
+        .ar-edge-left { left: 14px; }
+        .ar-edge-right { right: 14px; }
+        .ar-edge-arrow { font-size: 20px; line-height: 1; }
+        .ar-edge-count {
+            background: rgba(0,243,255,0.15);
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-size: 11px;
+        }
+
+        #ar-compass-readout {
+            pointer-events: none;
+            background: rgba(0,0,0,0.6);
+            color: var(--neon-cyan);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 10px;
+            letter-spacing: 1px;
+            border: 1px solid rgba(0,243,255,0.25);
+        }
+
+        .ar-calibration-btn-row {
+            display: flex;
+            gap: 8px;
+            pointer-events: auto;
+        }
+        .ar-calibrate-btn {
+            flex: 1;
+            background: rgba(0, 243, 255, 0.12);
+            color: var(--neon-cyan);
+            border: 1px solid var(--neon-cyan);
+            padding: 8px 4px;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .ar-calibrate-btn:hover { background: rgba(0, 243, 255, 0.25); }
+
+        .ar-marker-dot {
+            border-radius: 50%;
+            box-shadow: 0 0 12px currentColor;
+            animation: ar-pulse 2.2s ease-in-out infinite;
+        }
+        @keyframes ar-pulse {
+            0%, 100% { box-shadow: 0 0 8px currentColor; }
+            50% { box-shadow: 0 0 18px currentColor; }
+        }
+        .ar-marker-distance {
+            font-size: 9px;
+            color: var(--neon-cyan);
+            opacity: 0.85;
+            margin-top: 2px;
+        }
+        .ar-marker.ar-marker-selected .ar-marker-dot {
+            animation: ar-pulse 0.9s ease-in-out infinite;
         }
         #ar-hud {
             position: absolute;
@@ -740,7 +1037,7 @@
     <!-- Cookie Consent Banner -->
     <div id="cookie-banner">
         <h4>TELEMETRY COOKIE CONSENT</h4>
-        <p>We utilize local cookie storage to remember your custom themes and advanced filter adjustments across sessions[cite: 6].</p>
+        <p>We utilize local cookie storage to remember your custom themes, advanced filter adjustments, and saved favorites across sessions.</p>
         <div class="cookie-btn-group">
             <button id="cookie-accept-btn" class="cookie-btn">ACCEPT ALL</button>
             <button id="cookie-reject-btn" class="cookie-btn">NECESSARY ONLY</button>
@@ -763,6 +1060,9 @@
         <button class="menu-toggle-btn" id="filters-toggle-btn" title="Filters & Intelligence">
             <svg viewBox="0 0 24 24"><path d="M3 4c-1.1 0-2 .9-2 2v1.5c0 .5.2 1 .6 1.4L8 15.3V21c0 .6.4 1 1 1h6c.6 0 1-.4 1-1v-5.7l6.4-6.4c.4-.4.6-.9.6-1.4V6c0-1.1-.9-2-2-2H3z"/></svg>
         </button>
+        <button class="menu-toggle-btn" id="favorites-toggle-btn" title="Favorite Satellites">
+            <svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+        </button>
         <button class="menu-toggle-btn" id="settings-toggle-btn" title="Map Theme & Passes">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.04.64.09.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         </button>
@@ -774,11 +1074,20 @@
     <div id="ar-view">
         <video id="ar-video" autoplay playsinline muted></video>
         <div id="ar-marker-layer"></div>
-        <div id="ar-crosshair"></div>
+        <div id="ar-crosshair">
+            <div class="ar-crosshair-tick ar-tick-top"></div>
+            <div class="ar-crosshair-tick ar-tick-bottom"></div>
+            <div class="ar-crosshair-tick ar-tick-left"></div>
+            <div class="ar-crosshair-tick ar-tick-right"></div>
+        </div>
+
+        <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">‹</span><span class="ar-edge-count">0</span></div>
+        <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">›</span></div>
 
         <div id="ar-hud">
             <div id="ar-status-container">
                 <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
+                <div id="ar-compass-readout">HDG --- °</div>
                 <button id="ar-toggle-panel-btn">⚙ HIDE RANGE CONTROL</button>
             </div>
             <button id="ar-close-btn">✕</button>
@@ -792,11 +1101,25 @@
                 </div>
                 <input type="range" id="ar-distance-slider" min="10" max="500" value="100" step="10">
             </div>
+            <div class="ar-range-slider-container">
+                <div class="ar-range-info">
+                    <span>COMPASS CALIBRATION</span>
+                    <span id="ar-calibration-val-display">0°</span>
+                </div>
+                <div class="ar-calibration-btn-row">
+                    <button id="ar-calibrate-minus" class="ar-calibrate-btn">− 5°</button>
+                    <button id="ar-calibrate-reset" class="ar-calibrate-btn">RESET</button>
+                    <button id="ar-calibrate-plus" class="ar-calibrate-btn">+ 5°</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <div id="sat-info-panel">
-        <h3 id="panel-sat-name">TELEMETRY DATA FEED</h3>
+        <div class="sat-info-header">
+            <h3 id="panel-sat-name">TELEMETRY DATA FEED</h3>
+            <button id="panel-fav-btn" title="Toggle Favorite">☆</button>
+        </div>
         <div class="sat-info-grid">
             <div>
                 <div class="sat-info-row"><span>NORAD CATALOG ID:</span> <b id="panel-norad">-</b></div>
@@ -812,6 +1135,17 @@
                 <div class="sat-info-row"><span>INCLINATION:</span> <b id="panel-incl">-</b></div>
                 <div class="sat-info-row"><span>ECCENTRICITY:</span> <b id="panel-ecc">-</b></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Favorites Panel -->
+    <div id="favorites-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 15px; letter-spacing: 1px; color: var(--text-main);">FAVORITE SATELLITES</h3>
+            <button id="close-favorites-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold;">✕</button>
+        </div>
+        <div id="favorites-list-container">
+            <p style="color: var(--text-dim); text-align: center; margin: 20px 0;">No favorite satellites saved yet.</p>
         </div>
     </div>
 
@@ -895,26 +1229,133 @@
     </div>
 
     <div id="controls">
-        <b>PERFORMANCE MODE:</b><br><br>
-        <select id="perf-mode-select">
-            <option value="high">High Performance</option>
-            <option value="normal" selected>Normal Mode</option>
-            <option value="potato">Potato Mode</option>
-        </select>
+        <div class="settings-tabs">
+            <button class="settings-tab-btn active" data-tab="tab-general">GENERAL</button>
+            <button class="settings-tab-btn" data-tab="tab-colors">COLORS</button>
+        </div>
 
-        <div class="section-divider"></div>
+        <div id="tab-general" class="settings-tab-content active">
+            <b>PERFORMANCE MODE:</b><br><br>
+            <select id="perf-mode-select">
+                <option value="high">High Performance</option>
+                <option value="normal" selected>Normal Mode</option>
+                <option value="potato">Potato Mode</option>
+            </select>
 
-        <b>CARTOGRAPHY THEME:</b><br><br>
-        <select id="theme-select">
-            <option value="dark" selected>Dark Mode</option>
-            <option value="terrain">Hybrid Terrain Mode</option>
-            <option value="light">Light Mode</option>
-        </select>
+            <div class="section-divider"></div>
 
-        <div class="section-divider"></div>
+            <b>CARTOGRAPHY THEME:</b><br><br>
+            <select id="theme-select">
+                <option value="dark" selected>Dark Mode</option>
+                <option value="terrain">Hybrid Terrain Mode</option>
+                <option value="light">Light Mode</option>
+            </select>
 
-        <b>TELEMETRY ALERTS:</b><br><br>
-        <button id="open-notif-modal" class="action-btn">CONFIGURE NOTIFICATIONS</button>
+            <div class="section-divider"></div>
+
+            <b>TELEMETRY ALERTS:</b><br><br>
+            <button id="open-notif-modal" class="action-btn">CONFIGURE NOTIFICATIONS</button>
+        </div>
+
+        <div id="tab-colors" class="settings-tab-content">
+            <b>UI COLOR THEME:</b><br><br>
+            <select id="color-theme-select">
+                <option value="default" selected>Neon Cyan (Default)</option>
+                <option value="cyberpunk">Cyberpunk</option>
+                <option value="solarized">Solarized Dark</option>
+                <option value="military">Military HUD</option>
+                <option value="amber">Amber CRT</option>
+                <option value="arctic">Arctic Ice</option>
+            </select>
+
+            <div class="section-divider"></div>
+
+            <b>SAVED CUSTOM THEMES:</b><br><br>
+            <select id="saved-custom-themes-select"></select>
+            <input type="text" id="custom-theme-name-input" placeholder="Theme Name (e.g. My Custom Theme)" style="width: 100%; box-sizing: border-box; background: rgba(128, 128, 128, 0.08); border: double 2px transparent; background-image: linear-gradient(rgba(128, 128, 128, 0.08), rgba(128, 128, 128, 0.08)), var(--gradient-primary); background-origin: border-box; background-clip: padding-box, border-box; color: var(--text-main); padding: 10px 14px; font-family: monospace; border-radius: 14px; margin-bottom: 8px; outline: none;">
+            <div style="display: flex; gap: 8px; margin-bottom: 8px;">
+                <button id="save-custom-theme-btn" class="action-btn" style="margin-bottom:0; flex:1;">SAVE THEME</button>
+                <button id="delete-custom-theme-btn" class="action-btn close-modal" style="margin-bottom:0; flex:1;">DELETE</button>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <b>UI COLORS (PRIMARY & SECONDARY):</b><br><br>
+            <div class="color-picker-row">
+                <span>Primary UI Color</span>
+                <input type="color" id="color-ui-primary" value="#00f3ff">
+            </div>
+            <div class="color-picker-row">
+                <span>Secondary UI Color</span>
+                <input type="color" id="color-ui-secondary" value="#0066ff">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <b>ORBIT TRAJECTORY LINES:</b><br><br>
+            <div class="color-picker-row">
+                <span>Path Trajectory</span>
+                <input type="color" id="color-trajectory" value="#00f3ff">
+            </div>
+
+            <div class="section-divider"></div>
+
+            <b>SATELLITE ICON COLORS:</b><br><br>
+            
+            <!-- Stacked Satellite Icon Preview Cards with Gradient Outlines -->
+            <div class="sat-preview-card">
+                <div class="sat-preview-left">
+                    <div class="sat-preview-icon-box" id="preview-icon-stations">
+                        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--preview-stations, #ffffff)" stroke-width="3"/><rect x="8" y="11" width="5" height="10" rx="1" fill="var(--preview-stations, #ffffff)"/><rect x="19" y="11" width="5" height="10" rx="1" fill="var(--preview-stations, #ffffff)"/><line x1="13" y1="16" x2="19" y2="16" stroke="var(--preview-stations, #ffffff)" stroke-width="3"/></svg>
+                    </div>
+                    <span>Space Stations</span>
+                </div>
+                <input type="color" id="color-sat-stations" value="#ffffff">
+            </div>
+
+            <div class="sat-preview-card">
+                <div class="sat-preview-left">
+                    <div class="sat-preview-icon-box" id="preview-icon-starlink">
+                        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--preview-starlink, #3b5bdb)" stroke-width="3"/><rect x="9" y="9" width="14" height="14" rx="2" transform="rotate(-15 16 16)" fill="var(--preview-starlink, #3b5bdb)"/></svg>
+                    </div>
+                    <span>Starlink Network</span>
+                </div>
+                <input type="color" id="color-sat-starlink" value="#3b5bdb">
+            </div>
+
+            <div class="sat-preview-card">
+                <div class="sat-preview-left">
+                    <div class="sat-preview-icon-box" id="preview-icon-weather">
+                        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--preview-weather, #00ff66)" stroke-width="3"/><circle cx="16" cy="16" r="9" fill="none" stroke="var(--preview-weather, #00ff66)" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="30" stroke="var(--preview-weather, #00ff66)" stroke-width="2"/><line x1="2" y1="16" x2="30" y2="16" stroke="var(--preview-weather, #00ff66)" stroke-width="2"/><path d="M6 9 C12 7, 20 7, 26 9" fill="none" stroke="var(--preview-weather, #00ff66)" stroke-width="2"/><path d="M6 23 C12 25, 20 25, 26 23" fill="none" stroke="var(--preview-weather, #00ff66)" stroke-width="2"/></svg>
+                    </div>
+                    <span>Weather Systems</span>
+                </div>
+                <input type="color" id="color-sat-weather" value="#00ff66">
+            </div>
+
+            <div class="sat-preview-card">
+                <div class="sat-preview-left">
+                    <div class="sat-preview-icon-box" id="preview-icon-visual">
+                        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--preview-visual, #f59f00)" stroke-width="3"/><path d="M16 8 L18.5 13.5 L24 16 L18.5 18.5 L16 24 L13.5 18.5 L8 16 L13.5 13.5 Z" fill="var(--preview-visual, #f59f00)"/></svg>
+                    </div>
+                    <span>Optical / Visual</span>
+                </div>
+                <input type="color" id="color-sat-visual" value="#f59f00">
+            </div>
+
+            <div class="sat-preview-card">
+                <div class="sat-preview-left">
+                    <div class="sat-preview-icon-box" id="preview-icon-active">
+                        <svg width="24" height="24" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="none" stroke="var(--preview-active, #65d6fc)" stroke-width="3"/><rect x="5" y="13" width="7" height="6" rx="1" fill="var(--preview-active, #65d6fc)"/><rect x="20" y="13" width="7" height="6" rx="1" fill="var(--preview-active, #65d6fc)"/><rect x="13" y="12" width="6" height="8" rx="1.5" fill="var(--preview-active, #65d6fc)"/><circle cx="16" cy="10" r="2" fill="var(--preview-active, #65d6fc)"/></svg>
+                    </div>
+                    <span>Global Active / Other</span>
+                </div>
+                <input type="color" id="color-sat-active" value="#65d6fc">
+            </div>
+
+            <button id="sync-satellites-btn" class="action-btn" style="margin-top:10px;">SYNC SATELLITES TO UI</button>
+            <button id="reset-colors-btn" class="action-btn" style="margin-top:10px; background: rgba(128,128,128,0.15); color: var(--text-main);">RESET ALL COLORS</button>
+        </div>
     </div>
     
     <div id="map"></div>
@@ -922,7 +1363,6 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Cookie Consent, Theme Persistence, and Beta Warning Logic[cite: 6]
         (function() {
             const cookieBanner = document.getElementById('cookie-banner');
             const betaBanner = document.getElementById('beta-warning-banner');
@@ -1000,7 +1440,6 @@
             renderer: canvasRenderer
         }).setView([0, 0], 2);
 
-        // Hybrid theme group setup using Leaflet layer groups for borders/labels over satellite imagery
         const terrainBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, minZoom: 2, noWrap: false });
         const terrainOverlayLayer = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18, minZoom: 2, noWrap: false });
         const hybridTerrainGroup = L.layerGroup([terrainBaseLayer, terrainOverlayLayer]);
@@ -1011,7 +1450,6 @@
             light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, minZoom: 2, noWrap: false, renderer: canvasRenderer })
         };
 
-        // Restore Theme from Cookie/LocalStorage if available[cite: 6]
         const savedTheme = localStorage.getItem('sat_selected_theme') || 'dark';
         document.getElementById('theme-select').value = savedTheme;
         if (savedTheme === 'light') {
@@ -1022,7 +1460,7 @@
 
         document.getElementById('theme-select').addEventListener('change', (e) => {
             const selectedTheme = e.target.value;
-            localStorage.setItem('sat_selected_theme', selectedTheme); // Save theme preference via storage[cite: 6]
+            localStorage.setItem('sat_selected_theme', selectedTheme);
             
             if (selectedTheme === 'light') {
                 document.body.classList.add('light-theme');
@@ -1036,7 +1474,51 @@
             }
         });
 
-        // Performance Mode Setting Setup
+        const colorThemeClasses = ['theme-cyberpunk', 'theme-solarized', 'theme-military', 'theme-amber', 'theme-arctic'];
+
+        const themeSatellitePresets = {
+            default: { stations: '#ffffff', starlink: '#3b5bdb', weather: '#00ff66', visual: '#f59f00', active: '#65d6fc' },
+            cyberpunk: { stations: '#ffffff', starlink: '#7b2ff7', weather: '#ff2bd6', visual: '#ff0055', active: '#ff2bd6' },
+            solarized: { stations: '#eee8d5', starlink: '#268bd2', weather: '#2aa198', visual: '#cb4b16', active: '#2aa198' },
+            military: { stations: '#baffc9', starlink: '#00b32d', weather: '#00ff41', visual: '#ff4400', active: '#00ff41' },
+            amber: { stations: '#ffcc66', starlink: '#ff8800', weather: '#ffb000', visual: '#ff3300', active: '#ffb000' },
+            arctic: { stations: '#0c4a6e', starlink: '#0ea5e9', weather: '#38bdf8', visual: '#f472b6', active: '#38bdf8' }
+        };
+
+        const themeUiPresets = {
+            default: { primary: '#00f3ff', secondary: '#0066ff' },
+            cyberpunk: { primary: '#ff2bd6', secondary: '#7b2ff7' },
+            solarized: { primary: '#268bd2', secondary: '#2aa198' },
+            military: { primary: '#00ff41', secondary: '#00b32d' },
+            amber: { primary: '#ffb000', secondary: '#ff8800' },
+            arctic: { primary: '#38bdf8', secondary: '#0ea5e9' }
+        };
+
+        function applyColorThemeBodyClass(themeValue) {
+            document.body.classList.remove(...colorThemeClasses);
+            if (themeValue !== 'default') {
+                document.body.classList.add('theme-' + themeValue);
+            }
+        }
+
+        function applyColorTheme(themeValue) {
+            applyColorThemeBodyClass(themeValue);
+            customColors.colorThemeValue = themeValue;
+
+            const satPreset = themeSatellitePresets[themeValue] || themeSatellitePresets.default;
+            customColors.satellites = JSON.parse(JSON.stringify(satPreset));
+
+            const uiPreset = themeUiPresets[themeValue] || themeUiPresets.default;
+            customColors.uiPrimary = uiPreset.primary;
+            customColors.uiSecondary = uiPreset.secondary;
+            customColors.trajectory = uiPreset.primary;
+
+            initColorPickers();
+            ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+            if (selectedTracker) showTrajectory(selectedTracker);
+            saveCustomColors();
+        }
+
         let currentPerfMode = localStorage.getItem('sat_perf_mode') || 'normal';
         document.getElementById('perf-mode-select').value = currentPerfMode;
 
@@ -1045,7 +1527,6 @@
             localStorage.setItem('sat_perf_mode', currentPerfMode);
             statusDiv.innerText = `PERFORMANCE MODE SET TO: ${currentPerfMode.toUpperCase()}`;
             
-            // High mode unhides and loads hidden/additional satellite categories automatically
             if (currentPerfMode === 'high') {
                 document.querySelectorAll('.cat-box').forEach(box => {
                     box.checked = true;
@@ -1065,6 +1546,246 @@
         let userLocation = { lat: 0, lng: 0, alt: 0 };
         let userLocationMarker = null;
         let userRangeCircle = null;
+
+        let favoriteNoradIds = JSON.parse(localStorage.getItem('sat_favorites')) || [];
+
+        const defaultCustomColors = {
+            colorThemeValue: 'default',
+            trajectory: '#00f3ff',
+            uiPrimary: '#00f3ff',
+            uiSecondary: '#0066ff',
+            satellites: {
+                stations: '#ffffff',
+                starlink: '#3b5bdb',
+                weather: '#00ff66',
+                visual: '#f59f00',
+                active: '#65d6fc'
+            }
+        };
+
+        let savedCustomThemes = JSON.parse(localStorage.getItem('sat_saved_custom_themes')) || {
+            'Default Theme': defaultCustomColors
+        };
+
+        let activeCustomThemeName = localStorage.getItem('sat_active_custom_theme') || Object.keys(savedCustomThemes)[0];
+        if (!savedCustomThemes[activeCustomThemeName]) {
+            activeCustomThemeName = Object.keys(savedCustomThemes)[0];
+        }
+
+        let customColors = JSON.parse(JSON.stringify(savedCustomThemes[activeCustomThemeName]));
+
+        function saveCustomColors() {
+            savedCustomThemes[activeCustomThemeName] = JSON.parse(JSON.stringify(customColors));
+            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+        }
+
+        function updateSavedThemesDropdown() {
+            const selectEl = document.getElementById('saved-custom-themes-select');
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            for (let name in savedCustomThemes) {
+                const opt = document.createElement('option');
+                opt.value = name;
+                opt.innerText = name;
+                if (name === activeCustomThemeName) opt.selected = true;
+                selectEl.appendChild(opt);
+            }
+        }
+
+        function updateUiColors(primary, secondary) {
+            document.documentElement.style.setProperty('--neon-cyan', primary);
+            document.documentElement.style.setProperty('--neon-cyan-glow', primary + '66');
+            document.documentElement.style.setProperty('--border-color', primary + 'cc');
+            document.documentElement.style.setProperty('--neon-pink', secondary);
+            document.documentElement.style.setProperty('--gradient-primary', `linear-gradient(135deg, ${primary} 0%, ${secondary} 100%)`);
+        }
+
+        function initColorPickers() {
+            document.getElementById('color-ui-primary').value = customColors.uiPrimary || '#00f3ff';
+            document.getElementById('color-ui-secondary').value = customColors.uiSecondary || '#0066ff';
+            document.getElementById('color-trajectory').value = customColors.trajectory || '#00f3ff';
+            
+            document.getElementById('color-sat-stations').value = customColors.satellites.stations || '#ffffff';
+            document.getElementById('color-sat-starlink').value = customColors.satellites.starlink || '#3b5bdb';
+            document.getElementById('color-sat-weather').value = customColors.satellites.weather || '#00ff66';
+            document.getElementById('color-sat-visual').value = customColors.satellites.visual || '#f59f00';
+            document.getElementById('color-sat-active').value = customColors.satellites.active || '#65d6fc';
+
+            document.documentElement.style.setProperty('--preview-stations', customColors.satellites.stations || '#ffffff');
+            document.documentElement.style.setProperty('--preview-starlink', customColors.satellites.starlink || '#3b5bdb');
+            document.documentElement.style.setProperty('--preview-weather', customColors.satellites.weather || '#00ff66');
+            document.documentElement.style.setProperty('--preview-visual', customColors.satellites.visual || '#f59f00');
+            document.documentElement.style.setProperty('--preview-active', customColors.satellites.active || '#65d6fc');
+
+            updateUiColors(customColors.uiPrimary || '#00f3ff', customColors.uiSecondary || '#0066ff');
+            updateSavedThemesDropdown();
+        }
+
+        function updateSatelliteTypeColors(type) {
+            allTrackers.forEach(tracker => {
+                if (tracker.specificType === type) {
+                    const cfg = getSatelliteStyleConfig(tracker.specificType);
+                    if (tracker.dotMarker) {
+                        tracker.dotMarker.setStyle({ color: cfg.color });
+                    }
+                    if (tracker.customIconMarker) {
+                        const customDivIcon = L.divIcon({
+                            className: 'sat-badge-icon',
+                            html: getCategoryIconHtml(tracker.name, tracker.categories),
+                            iconSize: [28, 28],
+                            iconAnchor: [14, 14]
+                        });
+                        tracker.customIconMarker.setIcon(customDivIcon);
+                    }
+                }
+            });
+        }
+
+        const initialColorThemeValue = customColors.colorThemeValue || localStorage.getItem('sat_color_theme') || 'default';
+        document.getElementById('color-theme-select').value = initialColorThemeValue;
+        applyColorThemeBodyClass(initialColorThemeValue);
+        initColorPickers();
+        ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+
+        document.getElementById('color-theme-select').addEventListener('change', (e) => {
+            const selectedColorTheme = e.target.value;
+            localStorage.setItem('sat_color_theme', selectedColorTheme);
+            applyColorTheme(selectedColorTheme);
+        });
+
+        function restoreThemeSkin(themeValue) {
+            const value = themeValue || 'default';
+            applyColorThemeBodyClass(value);
+            document.getElementById('color-theme-select').value = value;
+            localStorage.setItem('sat_color_theme', value);
+        }
+
+        document.getElementById('saved-custom-themes-select').addEventListener('change', (e) => {
+            const selectedName = e.target.value;
+            if (savedCustomThemes[selectedName]) {
+                activeCustomThemeName = selectedName;
+                customColors = JSON.parse(JSON.stringify(savedCustomThemes[selectedName]));
+                localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+                restoreThemeSkin(customColors.colorThemeValue);
+                initColorPickers();
+                ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+                if (selectedTracker) showTrajectory(selectedTracker);
+                statusDiv.innerText = `LOADED THEME: ${selectedName.toUpperCase()}`;
+            }
+        });
+
+        document.getElementById('save-custom-theme-btn').addEventListener('click', () => {
+            const nameInput = document.getElementById('custom-theme-name-input');
+            let newName = nameInput.value.trim();
+            if (!newName) {
+                newName = activeCustomThemeName || 'Custom Theme ' + (Object.keys(savedCustomThemes).length + 1);
+            }
+            activeCustomThemeName = newName;
+            savedCustomThemes[activeCustomThemeName] = JSON.parse(JSON.stringify(customColors));
+
+            if (newName !== 'Default Theme' && savedCustomThemes['Default Theme']) {
+                delete savedCustomThemes['Default Theme'];
+            }
+
+            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+            updateSavedThemesDropdown();
+            nameInput.value = '';
+            statusDiv.innerText = `SAVED THEME: ${activeCustomThemeName.toUpperCase()}`;
+        });
+
+        document.getElementById('delete-custom-theme-btn').addEventListener('click', () => {
+            const keys = Object.keys(savedCustomThemes);
+            if (keys.length <= 1) {
+                statusDiv.innerText = `CANNOT DELETE THE ONLY SAVED THEME`;
+                return;
+            }
+            delete savedCustomThemes[activeCustomThemeName];
+            activeCustomThemeName = Object.keys(savedCustomThemes)[0];
+            customColors = JSON.parse(JSON.stringify(savedCustomThemes[activeCustomThemeName]));
+            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+            updateSavedThemesDropdown();
+            restoreThemeSkin(customColors.colorThemeValue);
+            initColorPickers();
+            ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+            if (selectedTracker) showTrajectory(selectedTracker);
+            statusDiv.innerText = `THEME DELETED. LOADED: ${activeCustomThemeName.toUpperCase()}`;
+        });
+
+        document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.settings-tab-content').forEach(c => c.classList.remove('active'));
+                
+                btn.classList.add('active');
+                const target = btn.getAttribute('data-tab');
+                document.getElementById(target).classList.add('active');
+            });
+        });
+
+        document.getElementById('color-ui-primary').addEventListener('input', (e) => {
+            customColors.uiPrimary = e.target.value;
+            updateUiColors(customColors.uiPrimary, customColors.uiSecondary || '#0066ff');
+            saveCustomColors();
+        });
+
+        document.getElementById('color-ui-secondary').addEventListener('input', (e) => {
+            customColors.uiSecondary = e.target.value;
+            updateUiColors(customColors.uiPrimary || '#00f3ff', customColors.uiSecondary);
+            saveCustomColors();
+        });
+
+        document.getElementById('color-trajectory').addEventListener('input', (e) => {
+            customColors.trajectory = e.target.value;
+            if (selectedTracker) {
+                showTrajectory(selectedTracker);
+            }
+            saveCustomColors();
+        });
+
+        ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => {
+            document.getElementById(`color-sat-${type}`).addEventListener('input', (e) => {
+                const val = e.target.value;
+                customColors.satellites[type] = val;
+                document.documentElement.style.setProperty(`--preview-${type}`, val);
+                updateSatelliteTypeColors(type);
+                saveCustomColors();
+            });
+        });
+
+        document.getElementById('sync-satellites-btn').addEventListener('click', () => {
+            const primary = document.getElementById('color-ui-primary').value;
+            const secondary = document.getElementById('color-ui-secondary').value;
+            
+            customColors.satellites.stations = primary;
+            customColors.satellites.starlink = primary;
+            customColors.satellites.weather = secondary;
+            customColors.satellites.visual = secondary;
+            customColors.satellites.active = primary;
+
+            initColorPickers();
+            ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+            saveCustomColors();
+            statusDiv.innerText = "SATELLITES SYNCHRONIZED WITH UI COLORS";
+        });
+
+        document.getElementById('reset-colors-btn').addEventListener('click', () => {
+            customColors = JSON.parse(JSON.stringify(defaultCustomColors));
+            restoreThemeSkin('default');
+            saveCustomColors();
+            initColorPickers();
+            ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => {
+                updateSatelliteTypeColors(type);
+            });
+            if (selectedTracker) {
+                showTrajectory(selectedTracker);
+            }
+            statusDiv.innerText = "ALL COLORS RESET TO DEFAULT";
+        });
+
+        initColorPickers();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -1104,7 +1825,6 @@
         let sliderMinIncl = 0, sliderMaxIncl = 180;
         let sliderMinVel = 0, sliderMaxVel = 15;
 
-        // Restore Advanced Filter Adjustments from Storage if available[cite: 6]
         const savedFilters = localStorage.getItem('sat_advanced_filters');
         if (savedFilters) {
             try {
@@ -1162,7 +1882,6 @@
 
             advancedFiltersActive = true;
             
-            // Save custom filter configurations to storage[cite: 6]
             localStorage.setItem('sat_advanced_filters', JSON.stringify({
                 minAlt: sliderMinAlt, maxAlt: sliderMaxAlt,
                 minIncl: sliderMinIncl, maxIncl: sliderMaxIncl,
@@ -1192,17 +1911,21 @@
 
         const filtersToggleBtn = document.getElementById('filters-toggle-btn');
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
+        const favoritesToggleBtn = document.getElementById('favorites-toggle-btn');
         const filtersPanel = document.getElementById('filters-panel');
         const controlsPanel = document.getElementById('controls');
+        const favoritesPanel = document.getElementById('favorites-panel');
+        const closeFavoritesPanel = document.getElementById('close-favorites-panel');
         const floatingBtnsContainer = document.getElementById('floating-btns-container');
         const satInfoPanel = document.getElementById('sat-info-panel');
 
         function updateFloatingButtonsVisibility() {
             const isFiltersOpen = filtersPanel.style.display === 'block' || filtersPanel.classList.contains('mobile-open');
             const isSettingsOpen = controlsPanel.style.display === 'block' || controlsPanel.classList.contains('mobile-open');
+            const isFavoritesOpen = favoritesPanel.style.display === 'block' || favoritesPanel.classList.contains('mobile-open');
             const isInfoOpen = satInfoPanel.style.display === 'block' || satInfoPanel.classList.contains('panel-open');
 
-            if (isFiltersOpen || isSettingsOpen || isInfoOpen) {
+            if (isFiltersOpen || isSettingsOpen || isFavoritesOpen || isInfoOpen) {
                 floatingBtnsContainer.classList.add('hidden');
             } else {
                 floatingBtnsContainer.classList.remove('hidden');
@@ -1212,8 +1935,10 @@
         function closeAllPanels() {
             filtersPanel.style.display = 'none';
             controlsPanel.style.display = 'none';
+            favoritesPanel.style.display = 'none';
             filtersPanel.classList.remove('mobile-open');
             controlsPanel.classList.remove('mobile-open');
+            favoritesPanel.classList.remove('mobile-open');
             updateFloatingButtonsVisibility();
         }
 
@@ -1254,6 +1979,118 @@
             }
             updateFloatingButtonsVisibility();
         });
+
+        favoritesToggleBtn.addEventListener('click', () => {
+            const isDesktop = window.innerWidth > 768;
+            const isOpen = isDesktop ? favoritesPanel.style.display === 'block' : favoritesPanel.classList.contains('mobile-open');
+
+            closeAllPanels();
+            satInfoPanel.classList.remove('panel-open');
+            satInfoPanel.style.display = 'none';
+
+            if (!isOpen) {
+                renderFavoritesList();
+                if (isDesktop) {
+                    favoritesPanel.style.display = 'block';
+                } else {
+                    favoritesPanel.style.display = 'block';
+                    setTimeout(() => favoritesPanel.classList.add('mobile-open'), 10);
+                }
+            }
+            updateFloatingButtonsVisibility();
+        });
+
+        closeFavoritesPanel.addEventListener('click', () => {
+            closeAllPanels();
+        });
+
+        function updateFavoriteButtonState(tracker) {
+            const favBtn = document.getElementById('panel-fav-btn');
+            if (!favBtn) return;
+            if (favoriteNoradIds.includes(tracker.noradId)) {
+                favBtn.innerText = '★';
+                favBtn.style.color = 'var(--neon-cyan)';
+            } else {
+                favBtn.innerText = '☆';
+                favBtn.style.color = 'var(--text-dim)';
+            }
+        }
+
+        document.getElementById('panel-fav-btn').addEventListener('click', () => {
+            if (!selectedTracker) return;
+            const index = favoriteNoradIds.indexOf(selectedTracker.noradId);
+            if (index > -1) {
+                favoriteNoradIds.splice(index, 1);
+                statusDiv.innerText = `REMOVED FROM FAVORITES: ${selectedTracker.name}`;
+            } else {
+                favoriteNoradIds.push(selectedTracker.noradId);
+                statusDiv.innerText = `ADDED TO FAVORITES: ${selectedTracker.name}`;
+            }
+            localStorage.setItem('sat_favorites', JSON.stringify(favoriteNoradIds));
+            updateFavoriteButtonState(selectedTracker);
+            renderFavoritesList();
+        });
+
+        function renderFavoritesList() {
+            const container = document.getElementById('favorites-list-container');
+            if (!container) return;
+            
+            if (favoriteNoradIds.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin: 20px 0;">No favorite satellites saved yet.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+            favoriteNoradIds.forEach(noradId => {
+                const tracker = allTrackers.find(t => t.noradId === noradId);
+                const satName = tracker ? tracker.name : `NORAD ID: ${noradId}`;
+                const satType = tracker ? tracker.specificType.toUpperCase() : 'ORBITAL';
+                
+                const item = document.createElement('div');
+                item.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.08); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(128,128,128,0.2);";
+                item.innerHTML = `
+                    <div>
+                        <div style="font-weight: bold; color: var(--text-main); font-size: 11px;">${satName}</div>
+                        <div style="font-size: 9px; color: var(--text-dim);">NORAD: ${noradId} | ${satType}</div>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button class="fav-track-btn" data-norad="${noradId}" style="background: var(--gradient-primary); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer; font-weight: bold;">VIEW</button>
+                        <button class="fav-remove-btn" data-norad="${noradId}" style="background: var(--neon-pink); color: #fff; border: none; padding: 6px 8px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer;">✕</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+
+            container.querySelectorAll('.fav-track-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-norad');
+                    const tracker = allTrackers.find(t => t.noradId === id);
+                    if (tracker) {
+                        selectedTracker = tracker;
+                        showTrajectory(tracker);
+                        openSatelliteInfoPanel(tracker);
+                        closeAllPanels();
+                    } else {
+                        statusDiv.innerText = `TARGET NORAD ${id} NOT CURRENTLY LOADED IN ACTIVE CATEGORIES`;
+                    }
+                });
+            });
+
+            container.querySelectorAll('.fav-remove-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.getAttribute('data-norad');
+                    const idx = favoriteNoradIds.indexOf(id);
+                    if (idx > -1) {
+                        favoriteNoradIds.splice(idx, 1);
+                        localStorage.setItem('sat_favorites', JSON.stringify(favoriteNoradIds));
+                        renderFavoritesList();
+                        if (selectedTracker && selectedTracker.noradId === id) {
+                            updateFavoriteButtonState(selectedTracker);
+                        }
+                    }
+                });
+            });
+        }
 
         let notificationSettings = {
             enabled: false,
@@ -1343,36 +2180,40 @@
         }
 
         function getSatelliteStyleConfig(specificType) {
+            const c = (customColors && customColors.satellites && customColors.satellites[specificType])
+                        ? customColors.satellites[specificType]
+                        : '#65d6fc';
+
             switch(specificType) {
                 case 'stations':
                     return { 
-                        color: '#ffffff', 
+                        color: c, 
                         label: 'STATION', 
-                        shape: '<circle cx="16" cy="16" r="14" fill="none" stroke="#ffffff" stroke-width="3"/><rect x="8" y="11" width="5" height="10" rx="1" fill="#ffffff"/><rect x="19" y="11" width="5" height="10" rx="1" fill="#ffffff"/><line x1="13" y1="16" x2="19" y2="16" stroke="#ffffff" stroke-width="3"/>' 
+                        shape: `<circle cx="16" cy="16" r="14" fill="none" stroke="${c}" stroke-width="3"/><rect x="8" y="11" width="5" height="10" rx="1" fill="${c}"/><rect x="19" y="11" width="5" height="10" rx="1" fill="${c}"/><line x1="13" y1="16" x2="19" y2="16" stroke="${c}" stroke-width="3"/>` 
                     };
                 case 'starlink':
                     return { 
-                        color: '#3b5bdb', 
+                        color: c, 
                         label: 'STARLINK', 
-                        shape: '<circle cx="16" cy="16" r="14" fill="none" stroke="#3b5bdb" stroke-width="3"/><rect x="9" y="9" width="14" height="14" rx="2" transform="rotate(-15 16 16)" fill="#3b5bdb"/>' 
+                        shape: `<circle cx="16" cy="16" r="14" fill="none" stroke="${c}" stroke-width="3"/><rect x="9" y="9" width="14" height="14" rx="2" transform="rotate(-15 16 16)" fill="${c}"/>` 
                     };
                 case 'weather':
                     return { 
-                        color: '#00ff66', 
+                        color: c, 
                         label: 'WEATHER', 
-                        shape: '<circle cx="16" cy="16" r="14" fill="none" stroke="#00ff66" stroke-width="3"/><circle cx="16" cy="16" r="9" fill="none" stroke="#00ff66" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="30" stroke="#00ff66" stroke-width="2"/><line x1="2" y1="16" x2="30" y2="16" stroke="#00ff66" stroke-width="2"/><path d="M6 9 C12 7, 20 7, 26 9" fill="none" stroke="#00ff66" stroke-width="2"/><path d="M6 23 C12 25, 20 25, 26 23" fill="none" stroke="#00ff66" stroke-width="2"/>' 
+                        shape: `<circle cx="16" cy="16" r="14" fill="none" stroke="${c}" stroke-width="3"/><circle cx="16" cy="16" r="9" fill="none" stroke="${c}" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="30" stroke="${c}" stroke-width="2"/><line x1="2" y1="16" x2="30" y2="16" stroke="${c}" stroke-width="2"/><path d="M6 9 C12 7, 20 7, 26 9" fill="none" stroke="${c}" stroke-width="2"/><path d="M6 23 C12 25, 20 25, 26 23" fill="none" stroke="${c}" stroke-width="2"/>` 
                     };
                 case 'visual':
                     return { 
-                        color: '#f59f00', 
+                        color: c, 
                         label: 'OPTICAL', 
-                        shape: '<circle cx="16" cy="16" r="14" fill="none" stroke="#f59f00" stroke-width="3"/><path d="M16 8 L18.5 13.5 L24 16 L18.5 18.5 L16 24 L13.5 18.5 L8 16 L13.5 13.5 Z" fill="#f59f00"/>' 
+                        shape: `<circle cx="16" cy="16" r="14" fill="none" stroke="${c}" stroke-width="3"/><path d="M16 8 L18.5 13.5 L24 16 L18.5 18.5 L16 24 L13.5 18.5 L8 16 L13.5 13.5 Z" fill="${c}"/>` 
                     };
                 default: 
                     return { 
-                        color: '#65d6fc', 
+                        color: c, 
                         label: 'SAT', 
-                        shape: '<circle cx="16" cy="16" r="14" fill="none" stroke="#65d6fc" stroke-width="3"/><rect x="5" y="13" width="7" height="6" rx="1" fill="#65d6fc"/><rect x="20" y="13" width="7" height="6" rx="1" fill="#65d6fc"/><rect x="13" y="12" width="6" height="8" rx="1.5" fill="#65d6fc"/><circle cx="16" cy="10" r="2" fill="#65d6fc"/>' 
+                        shape: `<circle cx="16" cy="16" r="14" fill="none" stroke="${c}" stroke-width="3"/><rect x="5" y="13" width="7" height="6" rx="1" fill="${c}"/><rect x="20" y="13" width="7" height="6" rx="1" fill="${c}"/><rect x="13" y="12" width="6" height="8" rx="1.5" fill="${c}"/><circle cx="16" cy="10" r="2" fill="${c}"/>` 
                     };
             }
         }
@@ -1497,6 +2338,8 @@
             document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + '°';
             document.getElementById('panel-ecc').innerText = tracker.eccentricity.toFixed(6);
 
+            updateFavoriteButtonState(tracker);
+
             let regimeStr = "LEO (Low Earth Orbit)";
             if (tracker.alt > 35000) regimeStr = "GEO (Geosynchronous)";
             else if (tracker.alt > 2000) regimeStr = "MEO (Medium Earth Orbit)";
@@ -1540,7 +2383,7 @@
             if (currentSegment.length > 0) allSegments.push(currentSegment);
 
             allSegments.forEach(seg => {
-                const polyline = L.polyline(seg, { color: '#00f3ff', weight: 2, opacity: 0.85 }).addTo(map);
+                const polyline = L.polyline(seg, { color: customColors.trajectory, weight: 2, opacity: 0.85 }).addTo(map);
                 orbitLayers.push(polyline);
             });
         }
@@ -1551,11 +2394,40 @@
             selectedTracker = null;
         }
 
+        // This was completely missing — clicking empty map space did nothing,
+        // so there was no way to deselect a satellite or dismiss open panels
+        // except by picking another satellite or re-opening the same panel.
+        map.on('click', () => {
+            clearTrajectory();
+            satInfoPanel.classList.remove('panel-open');
+            satInfoPanel.style.display = 'none';
+            closeAllPanels();
+            updateFloatingButtonsVisibility();
+        });
+
         let arActive = false;
-        let deviceHeading = 0;
-        let devicePitch = 0;
         let arMaxDistanceKm = 100;
         let arStream = null;
+
+        // Raw sensor readings vs. smoothed values actually used for rendering —
+        // smoothing kills the jitter you'd otherwise see from noisy phone sensors.
+        let rawHeading = 0;
+        let rawPitch = 0;
+        let smoothedHeading = 0;
+        let smoothedPitch = 0;
+        let headingCalibrationOffset = parseFloat(localStorage.getItem('sat_ar_calibration')) || 0;
+
+        // Full-catalog "which satellites are even roughly nearby" scan is expensive
+        // to run every frame, so it only reruns periodically. The small resulting
+        // candidate list then gets precise azimuth/elevation math every frame.
+        let arCandidateTrackers = [];
+        let arLastCandidateScan = 0;
+        const AR_CANDIDATE_RESCAN_MS = 1000;
+
+        const AR_FOV_H = 70; // degrees — typical rear camera horizontal FOV
+        const AR_FOV_V = 55; // degrees — narrower vertically for a portrait screen
+
+        const arMarkerElements = new Map(); // noradId -> DOM element, reused across frames instead of rebuilt
 
         const arDistanceSlider = document.getElementById('ar-distance-slider');
         const arRangeValDisplay = document.getElementById('ar-range-val-display');
@@ -1564,6 +2436,29 @@
             arMaxDistanceKm = parseInt(e.target.value, 10);
             arRangeValDisplay.innerText = `${arMaxDistanceKm} KM`;
             document.getElementById('ar-status-text').innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
+            arLastCandidateScan = 0; // force an immediate rescan with the new range
+        });
+
+        const arCalibrationValDisplay = document.getElementById('ar-calibration-val-display');
+        function updateCalibrationDisplay() {
+            arCalibrationValDisplay.innerText = `${headingCalibrationOffset > 0 ? '+' : ''}${headingCalibrationOffset}°`;
+        }
+        updateCalibrationDisplay();
+
+        document.getElementById('ar-calibrate-minus').addEventListener('click', () => {
+            headingCalibrationOffset -= 5;
+            localStorage.setItem('sat_ar_calibration', headingCalibrationOffset);
+            updateCalibrationDisplay();
+        });
+        document.getElementById('ar-calibrate-plus').addEventListener('click', () => {
+            headingCalibrationOffset += 5;
+            localStorage.setItem('sat_ar_calibration', headingCalibrationOffset);
+            updateCalibrationDisplay();
+        });
+        document.getElementById('ar-calibrate-reset').addEventListener('click', () => {
+            headingCalibrationOffset = 0;
+            localStorage.setItem('sat_ar_calibration', 0);
+            updateCalibrationDisplay();
         });
 
         const compassPermissionModal = document.getElementById('compass-permission-modal');
@@ -1639,7 +2534,16 @@
                 arToggleBtn.classList.add('ar-toggle-btn-active');
                 arStatusText.innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
 
-                window.addEventListener('deviceorientation', handleOrientation, true);
+                // Prefer the "absolute" orientation event where supported (more reliable
+                // true-north reference on Android); fall back to plain deviceorientation
+                // (which is what iOS Safari provides, using webkitCompassHeading on it).
+                if ('ondeviceorientationabsolute' in window) {
+                    window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+                } else {
+                    window.addEventListener('deviceorientation', handleOrientation, true);
+                }
+
+                arLastCandidateScan = 0;
                 startARLoop();
             } catch (err) {
                 arStatusText.innerText = "CAMERA ACCESS DENIED";
@@ -1648,12 +2552,24 @@
         }
 
         function handleOrientation(event) {
-            if (event.alpha !== null) {
-                deviceHeading = 360 - event.alpha;
+            let heading = null;
+            if (typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)) {
+                heading = event.webkitCompassHeading; // iOS Safari: already true-north relative, most reliable source
+            } else if (event.alpha !== null) {
+                heading = 360 - event.alpha; // Android absolute orientation / best-effort fallback
+            }
+            if (heading !== null) {
+                rawHeading = (heading + headingCalibrationOffset + 360) % 360;
             }
             if (event.beta !== null) {
-                devicePitch = event.beta;
+                rawPitch = event.beta - 90; // approx elevation angle when phone is held vertically, camera facing outward
             }
+        }
+
+        // Circular-safe smoothing so headings don't jump wildly across the 0°/360° seam.
+        function smoothAngle(current, target, factor) {
+            let diff = ((target - current + 540) % 360) - 180;
+            return (current + diff * factor + 360) % 360;
         }
 
         document.getElementById('ar-close-btn').addEventListener('click', () => {
@@ -1667,6 +2583,10 @@
                 arStream = null;
             }
             window.removeEventListener('deviceorientation', handleOrientation, true);
+            window.removeEventListener('deviceorientationabsolute', handleOrientation, true);
+
+            arMarkerElements.forEach(el => el.remove());
+            arMarkerElements.clear();
         });
 
         const arTogglePanelBtn = document.getElementById('ar-toggle-panel-btn');
@@ -1681,69 +2601,165 @@
             }
         });
 
+        // Periodic coarse scan across the whole loaded catalog to find which satellites
+        // are even roughly within range. This is the only place that touches every
+        // tracked satellite, and it only runs once a second — not every frame — which is
+        // what makes the AR view fast even with thousands of satellites loaded.
+        function rescanARCandidates(now) {
+            const gmst = satellite.gstime(now);
+            const candidates = [];
+            const cosLat = Math.cos(userLocation.lat * Math.PI / 180);
+
+            for (const tracker of allTrackers) {
+                const pv = satellite.propagate(tracker.satrec, now);
+                if (!pv.position) continue;
+                const geo = satellite.eciToGeodetic(pv.position, gmst);
+                const lat = satellite.degreesLat(geo.latitude);
+                const lng = satellite.degreesLong(geo.longitude);
+
+                // Cheap flat-earth ground-distance estimate — just for this coarse
+                // prefilter. Precise slant-range filtering happens every frame below.
+                const dLatKm = (lat - userLocation.lat) * 111;
+                const dLngKm = (lng - userLocation.lng) * 111 * cosLat;
+                const roughDistKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
+
+                if (roughDistKm < arMaxDistanceKm + geo.height) {
+                    candidates.push(tracker);
+                }
+            }
+            arCandidateTrackers = candidates;
+        }
+
+        function removeARMarker(noradId) {
+            const el = arMarkerElements.get(noradId);
+            if (el) {
+                el.remove();
+                arMarkerElements.delete(noradId);
+            }
+        }
+
         function startARLoop() {
             const markerLayer = document.getElementById('ar-marker-layer');
-            
+            const compassReadout = document.getElementById('ar-compass-readout');
+            const edgeLeft = document.getElementById('ar-edge-left');
+            const edgeRight = document.getElementById('ar-edge-right');
+
             function arLoop() {
                 if (!arActive) return;
-                markerLayer.innerHTML = '';
                 const now = new Date();
+
+                if (now.getTime() - arLastCandidateScan > AR_CANDIDATE_RESCAN_MS) {
+                    rescanARCandidates(now);
+                    arLastCandidateScan = now.getTime();
+                }
+
+                smoothedHeading = smoothAngle(smoothedHeading, rawHeading, 0.15);
+                smoothedPitch += (rawPitch - smoothedPitch) * 0.15;
+                compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')}°`;
+
                 const gmst = satellite.gstime(now);
+                const observerGd = {
+                    latitude: satellite.degreesToRadians(userLocation.lat),
+                    longitude: satellite.degreesToRadians(userLocation.lng),
+                    height: (userLocation.alt || 0) / 1000
+                };
 
                 const screenWidth = window.innerWidth;
                 const screenHeight = window.innerHeight;
-                const fov = 60;
+                const stillVisible = new Set();
+                let offscreenLeftCount = 0;
+                let offscreenRightCount = 0;
 
-                allTrackers.forEach(tracker => {
+                arCandidateTrackers.forEach(tracker => {
                     const pv = satellite.propagate(tracker.satrec, now);
-                    if (pv.position) {
-                        const geo = satellite.eciToGeodetic(pv.position, gmst);
-                        const targetLat = satellite.degreesLat(geo.latitude);
-                        const targetLng = satellite.degreesLong(geo.longitude);
-                        const targetAlt = geo.height;
+                    if (!pv.position) return;
 
-                        const dLatKm = (targetLat - userLocation.lat) * 111;
-                        const dLngKm = (targetLng - userLocation.lng) * 111 * Math.cos(userLocation.lat * Math.PI / 180);
-                        const distanceKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
+                    // Real azimuth/elevation via satellite.js — accounts for Earth's
+                    // curvature and observer position correctly, unlike a flat-earth
+                    // atan2(altitude, ground_distance) approximation.
+                    const positionEcf = satellite.eciToEcf(pv.position, gmst);
+                    const look = satellite.ecfToLookAngles(observerGd, positionEcf);
+                    const azimuth = satellite.radiansToDegrees(look.azimuth);
+                    const elevation = satellite.radiansToDegrees(look.elevation);
+                    const rangeKm = look.rangeSat;
 
-                        if (distanceKm > arMaxDistanceKm) return;
+                    if (elevation < -2 || rangeKm > arMaxDistanceKm) {
+                        removeARMarker(tracker.noradId);
+                        return;
+                    }
 
-                        const dLng = (targetLng - userLocation.lng) * (Math.PI / 180);
-                        const lat1R = userLocation.lat * (Math.PI / 180);
-                        const lat2R = targetLat * (Math.PI / 180);
+                    let relAzimuth = ((azimuth - smoothedHeading + 540) % 360) - 180;
+                    let relElevation = elevation - smoothedPitch;
 
-                        const y = Math.sin(dLng) * Math.cos(lat2R);
-                        const x = Math.cos(lat1R) * Math.sin(lat2R) - Math.sin(lat1R) * Math.cos(lat2R) * Math.cos(dLng);
-                        let azimuth = Math.atan2(y, x) * (180 / Math.PI);
-                        azimuth = (azimuth + 360) % 360;
+                    const inFov = Math.abs(relAzimuth) < AR_FOV_H / 2 && Math.abs(relElevation) < AR_FOV_V / 2;
 
-                        const elevation = Math.atan2(targetAlt, distanceKm) * (180 / Math.PI);
-
-                        let relAzimuth = (azimuth - deviceHeading + 540) % 360 - 180;
-                        let relElevation = elevation - (devicePitch - 90);
-
-                        if (Math.abs(relAzimuth) < fov / 2 && Math.abs(relElevation) < fov / 2) {
-                            const screenX = (screenWidth / 2) + (relAzimuth / (fov / 2)) * (screenWidth / 2);
-                            const screenY = (screenHeight / 2) - (relElevation / (fov / 2)) * (screenHeight / 2);
-
-                            const markerEl = document.createElement('div');
-                            markerEl.className = 'ar-marker';
-                            markerEl.style.left = `${screenX}px`;
-                            markerEl.style.top = `${screenY}px`;
-                            
-                            markerEl.innerHTML = `
-                                <div class="ar-marker-dot"></div>
-                                <div class="ar-marker-label">${tracker.name} | ${tracker.specificType.toUpperCase()}</div>
-                            `;
-                            
-                            markerEl.addEventListener('click', () => {
-                                selectSatellite({ stopPropagation: () => {} }, tracker);
-                                document.getElementById('ar-close-btn').click();
-                            });
-                            markerLayer.appendChild(markerEl);
+                    if (!inFov) {
+                        removeARMarker(tracker.noradId);
+                        // Only count things roughly at eye level as "off to the side" —
+                        // ignore satellites way above/below where a side arrow wouldn't help.
+                        if (Math.abs(relElevation) < AR_FOV_V) {
+                            if (relAzimuth < 0) offscreenLeftCount++;
+                            else offscreenRightCount++;
                         }
+                        return;
+                    }
+
+                    stillVisible.add(tracker.noradId);
+
+                    const screenX = (screenWidth / 2) + (relAzimuth / (AR_FOV_H / 2)) * (screenWidth / 2);
+                    const screenY = (screenHeight / 2) - (relElevation / (AR_FOV_V / 2)) * (screenHeight / 2);
+
+                    // Closer satellites render bigger and brighter; farther ones shrink and fade.
+                    const proximity = Math.max(0, Math.min(1, 1 - (rangeKm / arMaxDistanceKm)));
+                    const dotSize = 10 + proximity * 12;
+                    const opacity = 0.55 + proximity * 0.45;
+                    const typeColor = (customColors.satellites && customColors.satellites[tracker.specificType]) || 'var(--neon-cyan)';
+
+                    let markerEl = arMarkerElements.get(tracker.noradId);
+                    if (!markerEl) {
+                        markerEl = document.createElement('div');
+                        markerEl.className = 'ar-marker';
+                        markerEl.innerHTML = `
+                            <div class="ar-marker-dot"></div>
+                            <div class="ar-marker-label"></div>
+                            <div class="ar-marker-distance"></div>
+                        `;
+                        markerEl.addEventListener('click', () => {
+                            selectSatellite({ stopPropagation: () => {} }, tracker);
+                            document.getElementById('ar-close-btn').click();
+                        });
+                        markerLayer.appendChild(markerEl);
+                        arMarkerElements.set(tracker.noradId, markerEl);
+                    }
+
+                    markerEl.style.left = `${screenX}px`;
+                    markerEl.style.top = `${screenY}px`;
+                    markerEl.classList.toggle('ar-marker-selected', tracker === selectedTracker);
+
+                    const dot = markerEl.querySelector('.ar-marker-dot');
+                    dot.style.width = `${dotSize}px`;
+                    dot.style.height = `${dotSize}px`;
+                    dot.style.background = typeColor;
+                    dot.style.color = typeColor;
+                    dot.style.opacity = opacity;
+                    dot.style.border = `2px solid ${typeColor}`;
+
+                    markerEl.querySelector('.ar-marker-label').innerText = `${tracker.name} · ${tracker.specificType.toUpperCase()}`;
+                    markerEl.querySelector('.ar-marker-distance').innerText = `${rangeKm.toFixed(0)} KM · ${elevation.toFixed(0)}° ELEV`;
+                });
+
+                // Clean up markers for anything that dropped out of the candidate list entirely
+                arMarkerElements.forEach((el, id) => {
+                    if (!stillVisible.has(id)) {
+                        const stillCandidate = arCandidateTrackers.some(t => t.noradId === id);
+                        if (!stillCandidate) removeARMarker(id);
                     }
                 });
+
+                edgeLeft.classList.toggle('visible', offscreenLeftCount > 0);
+                edgeRight.classList.toggle('visible', offscreenRightCount > 0);
+                edgeLeft.querySelector('.ar-edge-count').innerText = offscreenLeftCount;
+                edgeRight.querySelector('.ar-edge-count').innerText = offscreenRightCount;
 
                 requestAnimationFrame(arLoop);
             }
@@ -1764,7 +2780,6 @@
 
                 if (frameCount % frameInterval === 0 && allTrackers.length > 0) {
                     const now = new Date();
-                    const nowMs = now.getTime();
                     const gmst = satellite.gstime(now);
                     const currentZoom = map.getZoom();
                     const bounds = map.getBounds();
@@ -1787,12 +2802,8 @@
 
                     let skipFactor = 1;
                     if (currentPerfMode === 'high') {
-                        // High Performance: always render every tracked satellite, regardless of zoom.
                         skipFactor = 1;
                     } else if (currentPerfMode === 'potato') {
-                        // Potato Mode: show very few satellites at whole-map zoom levels (where the
-                        // sheer count would lag weaker devices most), and progressively reveal more
-                        // as the user zooms in, until showing everything once zoomed in close.
                         if (currentZoom <= 2) skipFactor = 12;
                         else if (currentZoom === 3) skipFactor = 8;
                         else if (currentZoom === 4) skipFactor = 4;
@@ -1844,18 +2855,17 @@
                                 if (targetRepresentation === 'dot') {
                                     let dynamicRadius = 2;
                                     if (currentPerfMode === 'potato') {
-                                        if (currentZoom >= 6) {
-                                            dynamicRadius = Math.max(6, currentZoom + 2);
-                                        } else {
-                                            dynamicRadius = 2;
-                                        }
-                                    } else {
-                                        dynamicRadius = Math.max(2, currentZoom);
+                                        dynamicRadius = 1.5;
                                     }
-                                    tracker.dotMarker.setRadius(dynamicRadius);
-                                    tracker.dotMarker.setLatLng(latLng);
-                                    
-                                    if (!tracker.isVisible) { tracker.dotMarker.addTo(map); tracker.isVisible = true; }
+                                    if (!tracker.isVisible) {
+                                        tracker.dotMarker.setLatLng(latLng);
+                                        tracker.dotMarker.setRadius(dynamicRadius);
+                                        map.addLayer(tracker.dotMarker);
+                                        tracker.isVisible = true;
+                                    } else {
+                                        tracker.dotMarker.setLatLng(latLng);
+                                        tracker.dotMarker.setRadius(dynamicRadius);
+                                    }
                                 } else {
                                     if (!tracker.customIconMarker) {
                                         const customDivIcon = L.divIcon({
@@ -1866,39 +2876,33 @@
                                         });
                                         tracker.customIconMarker = L.marker(latLng, { icon: customDivIcon });
                                         tracker.customIconMarker.on('click', (e) => { selectSatellite(e, tracker); });
+                                        map.addLayer(tracker.customIconMarker);
+                                        tracker.isVisible = true;
                                     } else {
                                         tracker.customIconMarker.setLatLng(latLng);
                                     }
-                                    if (!tracker.isVisible) { tracker.customIconMarker.addTo(map); tracker.isVisible = true; }
                                 }
                             } else {
                                 removeTrackerLayers(tracker);
                             }
                         }
                     }
-
-                    if (selectedTracker && nowMs >= trajectoryEndTime) showTrajectory(selectedTracker);
                 }
                 requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
         }
 
-        map.on('click', () => {
-            clearTrajectory();
-            satInfoPanel.classList.remove('panel-open');
-            satInfoPanel.style.display = 'none';
-            closeAllPanels();
-            updateFloatingButtonsVisibility();
-        });
+        async function initDefaultCategories() {
+            await loadCategory('stations');
+            await loadCategory('visual');
+            await loadCategory('starlink');
+            await loadCategory('weather');
+            await loadCategory('active');
+            startMasterAnimationLoop();
+        }
 
-        startMasterAnimationLoop();
-        
-        loadCategory('active');
-        loadCategory('stations');
-        loadCategory('visual');
-        loadCategory('starlink');
-        loadCategory('weather');
+        initDefaultCategories();
     </script>
 </body>
 </html>
