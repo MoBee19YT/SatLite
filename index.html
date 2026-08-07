@@ -1460,6 +1460,30 @@
             }, 60);
         })();
 
+        // Repair labels in older copies of this page that were saved through a
+        // legacy Windows text encoding. Escapes keep this fix encoding-safe too.
+        (function repairDisplayText() {
+            const replacements = new Map([
+                ['\u00e2\u0161\u00a0\u00ef\u00b8\u008f', '\u26a0\ufe0f'],
+                ['\u00e2\u20ac\u00b9', '\u2039'], ['\u00e2\u20ac\u00ba', '\u203a'],
+                ['\u00c2\u00b0', '\u00b0'], ['\u00e2\u0161\u2122', '\u2699'],
+                ['\u00e2\u0153\u2022', '\u2715'], ['\u00e2\u02c6\u2019', '\u2212'],
+                ['\u00e2\u02dc\u2020', '\u2606'], ['\u00f0\u0178\u0152\u0090', '\ud83c\udf10'],
+                ['\u00e2\u02dc\u2026', '\u2605'], ['\u00e2\u20ac\u201d', '\u2014'],
+                ['\u00e2\u20ac\u201c', '\u2013'], ['\u00c2\u00b7', '\u00b7']
+            ]);
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+            const nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach(node => {
+                const tag = node.parentElement && node.parentElement.tagName;
+                if (tag === 'SCRIPT' || tag === 'STYLE') return;
+                let text = node.nodeValue;
+                replacements.forEach((correct, broken) => { text = text.split(broken).join(correct); });
+                node.nodeValue = text;
+            });
+        })();
+
         const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
         const arToggleBtn = document.getElementById('ar-toggle-btn');
         if (!isMobileDevice) {
@@ -2455,6 +2479,12 @@
         let smoothedPitch = 0;
         let headingCalibrationOffset = parseFloat(localStorage.getItem('sat_ar_calibration')) || 0;
 
+        // Full 3-axis camera pose. Unlike separate heading/pitch values, these
+        // vectors retain the phone's roll, so labels stay attached to the sky.
+        let rawARPose = null;
+        let smoothARPose = null;
+        const AR_POSE_SMOOTHING = 0.16;
+
         // Full-catalog "which satellites are even roughly nearby" scan is expensive
         // to run every frame, so it only reruns periodically. The small resulting
         // candidate list then gets precise azimuth/elevation math every frame.
@@ -2479,7 +2509,7 @@
 
         const arCalibrationValDisplay = document.getElementById('ar-calibration-val-display');
         function updateCalibrationDisplay() {
-            arCalibrationValDisplay.innerText = `${headingCalibrationOffset > 0 ? '+' : ''}${headingCalibrationOffset}Â°`;
+            arCalibrationValDisplay.innerText = `${headingCalibrationOffset > 0 ? '+' : ''}${headingCalibrationOffset} DEG`;
         }
         updateCalibrationDisplay();
 
@@ -2612,18 +2642,61 @@
         }
 
         function handleOrientation(event) {
-            let heading = null;
-            if (typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)) {
-                heading = event.webkitCompassHeading; // iOS Safari: already true-north relative, most reliable source
-            } else if (event.alpha !== null) {
-                heading = 360 - event.alpha; // Android absolute orientation / best-effort fallback
+            if (event.alpha === null || event.beta === null || event.gamma === null) return;
+
+            // W3C defines alpha/beta/gamma as Z-X'-Y'' rotations. We convert the
+            // device axes into a rear-camera forward/right/up frame, rather than
+            // treating each axis as an unrelated 2D screen movement.
+            const compass = typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)
+                ? event.webkitCompassHeading
+                : null;
+            const alpha = toRadians(compass === null
+                ? event.alpha - headingCalibrationOffset
+                : 360 - compass - headingCalibrationOffset);
+            const beta = toRadians(event.beta);
+            const gamma = toRadians(event.gamma);
+            const ca = Math.cos(alpha), sa = Math.sin(alpha);
+            const cb = Math.cos(beta), sb = Math.sin(beta);
+            const cg = Math.cos(gamma), sg = Math.sin(gamma);
+
+            const right = normalize3({
+                x: ca * cg - sa * sb * sg,
+                y: sa * cg + ca * sb * sg,
+                z: cb * sg
+            });
+            const up = normalize3({ x: -sa * cb, y: ca * cb, z: sb });
+            const forward = normalize3({
+                x: -(ca * sg + sa * sb * cg),
+                y: -(sa * sg - ca * sb * cg),
+                z: -(cb * cg)
+            });
+            rawARPose = { forward, right, up };
+            rawHeading = (Math.atan2(forward.x, forward.y) * 180 / Math.PI + 360) % 360;
+        }
+
+        function toRadians(degrees) { return degrees * Math.PI / 180; }
+        function dot3(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
+        function cross3(a, b) {
+            return { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x };
+        }
+        function normalize3(v) {
+            const length = Math.hypot(v.x, v.y, v.z) || 1;
+            return { x: v.x / length, y: v.y / length, z: v.z / length };
+        }
+        function lerpVector(a, b, amount) {
+            return normalize3({ x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount, z: a.z + (b.z - a.z) * amount });
+        }
+        function getSmoothedARPose() {
+            if (!rawARPose) return null;
+            if (!smoothARPose) {
+                smoothARPose = { forward: rawARPose.forward, right: rawARPose.right, up: rawARPose.up };
+            } else {
+                smoothARPose.forward = lerpVector(smoothARPose.forward, rawARPose.forward, AR_POSE_SMOOTHING);
+                smoothARPose.up = lerpVector(smoothARPose.up, rawARPose.up, AR_POSE_SMOOTHING);
+                smoothARPose.right = normalize3(cross3(smoothARPose.forward, smoothARPose.up));
+                smoothARPose.up = normalize3(cross3(smoothARPose.right, smoothARPose.forward));
             }
-            if (heading !== null) {
-                rawHeading = (heading + headingCalibrationOffset + 360) % 360;
-            }
-            if (event.beta !== null) {
-                rawPitch = event.beta - 90;
-            }
+            return smoothARPose;
         }
 
         // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
@@ -2659,6 +2732,7 @@
         document.getElementById('ar-close-btn').innerHTML = '&times;';
         document.querySelector('#ar-edge-left .ar-edge-arrow').innerHTML = '&lsaquo;';
         document.querySelector('#ar-edge-right .ar-edge-arrow').innerHTML = '&rsaquo;';
+        arTogglePanelBtn.innerText = 'HIDE CONTROLS';
 
         arTogglePanelBtn.addEventListener('click', () => {
             arCalibrationPanel.classList.toggle('collapsed');
@@ -2743,9 +2817,14 @@
                     arLastCandidateScan = now.getTime();
                 }
 
-                smoothedHeading = smoothAngle(smoothedHeading, rawHeading, 0.15);
-                smoothedPitch += (rawPitch - smoothedPitch) * 0.15;
-                compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')}Â°`;
+                const pose = getSmoothedARPose();
+                if (!pose) {
+                    compassReadout.innerText = 'MOVE PHONE TO CALIBRATE';
+                    requestAnimationFrame(arLoop);
+                    return;
+                }
+                smoothedHeading = (Math.atan2(pose.forward.x, pose.forward.y) * 180 / Math.PI + 360) % 360;
+                compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')} DEG`;
 
                 const gmst = satellite.gstime(now);
                 const observerGd = {
@@ -2778,10 +2857,22 @@
                         return;
                     }
 
-                    let relAzimuth = ((azimuth - smoothedHeading + 540) % 360) - 180;
-                    let relElevation = elevation - smoothedPitch;
+                    // Convert satellite azimuth/elevation into the same ENU world
+                    // frame as the camera pose, then project it through camera axes.
+                    const azimuthRad = toRadians(azimuth);
+                    const elevationRad = toRadians(elevation);
+                    const satelliteDirection = {
+                        x: Math.cos(elevationRad) * Math.sin(azimuthRad),
+                        y: Math.cos(elevationRad) * Math.cos(azimuthRad),
+                        z: Math.sin(elevationRad)
+                    };
+                    const forwardAmount = dot3(satelliteDirection, pose.forward);
+                    const rightAmount = dot3(satelliteDirection, pose.right);
+                    const upAmount = dot3(satelliteDirection, pose.up);
+                    const relAzimuth = Math.atan2(rightAmount, forwardAmount) * 180 / Math.PI;
+                    const relElevation = Math.atan2(upAmount, forwardAmount) * 180 / Math.PI;
 
-                    const inFov = Math.abs(relAzimuth) < AR_FOV_H / 2 && Math.abs(relElevation) < AR_FOV_V / 2;
+                    const inFov = forwardAmount > 0 && Math.abs(relAzimuth) < AR_FOV_H / 2 && Math.abs(relElevation) < AR_FOV_V / 2;
 
                     if (!inFov) {
                         removeARMarker(tracker.noradId);
