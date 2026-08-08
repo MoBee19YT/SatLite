@@ -1133,9 +1133,9 @@
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
                     <span>AR MAX DISTANCE</span>
-                    <span id="ar-range-val-display">1500 KM</span>
+                    <span id="ar-range-val-display">800 KM</span>
                 </div>
-                <input type="range" id="ar-distance-slider" min="100" max="3000" value="1500" step="50">
+                <input type="range" id="ar-distance-slider" min="100" max="3000" value="800" step="50">
             </div>
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
@@ -1399,6 +1399,21 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // Surfaces any uncaught script error directly on-screen. On a phone there's
+        // no easy console access, so a silent error elsewhere in this file could
+        // otherwise break later features (like favorites) with zero visible sign.
+        window.addEventListener('error', function(event) {
+            console.error('Uncaught error:', event.error || event.message, 'at line', event.lineno);
+            let banner = document.getElementById('__global-error-banner');
+            if (!banner) {
+                banner = document.createElement('div');
+                banner.id = '__global-error-banner';
+                banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#ff2244;color:#fff;font-family:monospace;font-size:11px;padding:8px 12px;white-space:pre-wrap;word-break:break-word;';
+                document.body.appendChild(banner);
+            }
+            banner.innerText = 'SCRIPT ERROR: ' + (event.message || 'unknown') + ' (line ' + event.lineno + ')';
+        });
+
         (function() {
             const cookieBanner = document.getElementById('cookie-banner');
             const betaBanner = document.getElementById('beta-warning-banner');
@@ -2466,9 +2481,14 @@
         });
 
         let arActive = false;
-        // LEO satellites are normally 400â€“1,500 km away. A 100 km default
-        // meant the AR view could never show any of them.
-        let arMaxDistanceKm = 1500;
+        // LEO satellites near zenith are ~400-600km away, but near the horizon the
+        // same satellites can be 1500-2000km away due to Earth's curvature. 1500km
+        // as a default meant almost every satellite above the horizon anywhere in
+        // the sky qualified at once — often 50-100+ simultaneously. A more moderate
+        // distance combined with a minimum elevation filter (below) keeps the AR
+        // view to satellites that are actually usefully visible, not everything.
+        let arMaxDistanceKm = 800;
+        const AR_MIN_ELEVATION_DEG = 15; // things very near the horizon are usually blocked by buildings/trees anyway
         let arStream = null;
 
         // Raw sensor readings vs. smoothed values actually used for rendering â€”
@@ -2478,12 +2498,6 @@
         let smoothedHeading = 0;
         let smoothedPitch = 0;
         let headingCalibrationOffset = parseFloat(localStorage.getItem('sat_ar_calibration')) || 0;
-
-        // Full 3-axis camera pose. Unlike separate heading/pitch values, these
-        // vectors retain the phone's roll, so labels stay attached to the sky.
-        let rawARPose = null;
-        let smoothARPose = null;
-        const AR_POSE_SMOOTHING = 0.16;
 
         // Full-catalog "which satellites are even roughly nearby" scan is expensive
         // to run every frame, so it only reruns periodically. The small resulting
@@ -2641,63 +2655,41 @@
             }
         }
 
+        // Simpler, easier-to-verify heading + pitch model instead of a full 3-axis
+        // roll-compensated rotation matrix. The previous version's custom matrix
+        // couldn't be confidently verified correct and matched the reported
+        // "tilted / wrong direction" symptom exactly. This assumes the phone is
+        // held roughly upright, which is how people actually point a phone at
+        // the sky — it won't compensate for the phone being tilted/rolled to the
+        // side, but it will reliably point the right way for normal use.
         function handleOrientation(event) {
-            if (event.alpha === null || event.beta === null || event.gamma === null) return;
+            let alpha = event.alpha;
+            let beta  = event.beta;
+            let gamma = event.gamma;
 
-            // W3C defines alpha/beta/gamma as Z-X'-Y'' rotations. We convert the
-            // device axes into a rear-camera forward/right/up frame, rather than
-            // treating each axis as an unrelated 2D screen movement.
-            const compass = typeof event.webkitCompassHeading === 'number' && !isNaN(event.webkitCompassHeading)
-                ? event.webkitCompassHeading
-                : null;
-            const alpha = toRadians(compass === null
-                ? event.alpha - headingCalibrationOffset
-                : 360 - compass - headingCalibrationOffset);
-            const beta = toRadians(event.beta);
-            const gamma = toRadians(event.gamma);
-            const ca = Math.cos(alpha), sa = Math.sin(alpha);
-            const cb = Math.cos(beta), sb = Math.sin(beta);
-            const cg = Math.cos(gamma), sg = Math.sin(gamma);
+            // Prefer iOS true-north heading when available
+            if (typeof event.webkitCompassHeading === 'number') {
+                deviceHeading = (event.webkitCompassHeading + compassCalibrationOffset + 360) % 360;
+            } else if (alpha !== null) {
+                deviceHeading = (alpha + compassCalibrationOffset + 360) % 360;
+            }
 
-            const right = normalize3({
-                x: ca * cg - sa * sb * sg,
-                y: sa * cg + ca * sb * sg,
-                z: cb * sg
-            });
-            const up = normalize3({ x: -sa * cb, y: ca * cb, z: sb });
-            const forward = normalize3({
-                x: -(ca * sg + sa * sb * cg),
-                y: -(sa * sg - ca * sb * cg),
-                z: -(cb * cg)
-            });
-            rawARPose = { forward, right, up };
-            rawHeading = (Math.atan2(forward.x, forward.y) * 180 / Math.PI + 360) % 360;
+            // CRITICAL FIX: upright phone (looking at horizon) → pitch = 0
+            // beta ≈ 90 when held vertically → subtract 90
+            if (beta !== null) {
+                devicePitch = beta - 90;
+                // Soft clamp to reduce extreme jumps near zenith / nadir
+                devicePitch = Math.max(-90, Math.min(90, devicePitch));
+            } else {
+                devicePitch = 0;
+            }
+
+            deviceRoll = gamma !== null ? gamma : 0;
+
+            arCompassReadout.innerText = `HDG ${Math.round(deviceHeading)}° | PITCH ${Math.round(devicePitch)}°`;
         }
 
         function toRadians(degrees) { return degrees * Math.PI / 180; }
-        function dot3(a, b) { return a.x * b.x + a.y * b.y + a.z * b.z; }
-        function cross3(a, b) {
-            return { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x };
-        }
-        function normalize3(v) {
-            const length = Math.hypot(v.x, v.y, v.z) || 1;
-            return { x: v.x / length, y: v.y / length, z: v.z / length };
-        }
-        function lerpVector(a, b, amount) {
-            return normalize3({ x: a.x + (b.x - a.x) * amount, y: a.y + (b.y - a.y) * amount, z: a.z + (b.z - a.z) * amount });
-        }
-        function getSmoothedARPose() {
-            if (!rawARPose) return null;
-            if (!smoothARPose) {
-                smoothARPose = { forward: rawARPose.forward, right: rawARPose.right, up: rawARPose.up };
-            } else {
-                smoothARPose.forward = lerpVector(smoothARPose.forward, rawARPose.forward, AR_POSE_SMOOTHING);
-                smoothARPose.up = lerpVector(smoothARPose.up, rawARPose.up, AR_POSE_SMOOTHING);
-                smoothARPose.right = normalize3(cross3(smoothARPose.forward, smoothARPose.up));
-                smoothARPose.up = normalize3(cross3(smoothARPose.right, smoothARPose.forward));
-            }
-            return smoothARPose;
-        }
 
         // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
         function smoothAngle(current, target, factor) {
@@ -2817,13 +2809,8 @@
                     arLastCandidateScan = now.getTime();
                 }
 
-                const pose = getSmoothedARPose();
-                if (!pose) {
-                    compassReadout.innerText = 'MOVE PHONE TO CALIBRATE';
-                    requestAnimationFrame(arLoop);
-                    return;
-                }
-                smoothedHeading = (Math.atan2(pose.forward.x, pose.forward.y) * 180 / Math.PI + 360) % 360;
+                smoothedHeading = smoothAngle(smoothedHeading, rawHeading, 0.15);
+                smoothedPitch += (rawPitch - smoothedPitch) * 0.15;
                 compassReadout.innerText = `HDG ${Math.round(smoothedHeading).toString().padStart(3, '0')} DEG`;
 
                 const gmst = satellite.gstime(now);
@@ -2852,27 +2839,15 @@
                     const elevation = satellite.radiansToDegrees(look.elevation);
                     const rangeKm = look.rangeSat;
 
-                    if (elevation < -2 || rangeKm > arMaxDistanceKm) {
+                    if (elevation < AR_MIN_ELEVATION_DEG || rangeKm > arMaxDistanceKm) {
                         removeARMarker(tracker.noradId);
                         return;
                     }
 
-                    // Convert satellite azimuth/elevation into the same ENU world
-                    // frame as the camera pose, then project it through camera axes.
-                    const azimuthRad = toRadians(azimuth);
-                    const elevationRad = toRadians(elevation);
-                    const satelliteDirection = {
-                        x: Math.cos(elevationRad) * Math.sin(azimuthRad),
-                        y: Math.cos(elevationRad) * Math.cos(azimuthRad),
-                        z: Math.sin(elevationRad)
-                    };
-                    const forwardAmount = dot3(satelliteDirection, pose.forward);
-                    const rightAmount = dot3(satelliteDirection, pose.right);
-                    const upAmount = dot3(satelliteDirection, pose.up);
-                    const relAzimuth = Math.atan2(rightAmount, forwardAmount) * 180 / Math.PI;
-                    const relElevation = Math.atan2(upAmount, forwardAmount) * 180 / Math.PI;
+                    let relAzimuth = ((azimuth - smoothedHeading + 540) % 360) - 180;
+                    let relElevation = elevation - smoothedPitch;
 
-                    const inFov = forwardAmount > 0 && Math.abs(relAzimuth) < AR_FOV_H / 2 && Math.abs(relElevation) < AR_FOV_V / 2;
+                    const inFov = Math.abs(relAzimuth) < AR_FOV_H / 2 && Math.abs(relElevation) < AR_FOV_V / 2;
 
                     if (!inFov) {
                         removeARMarker(tracker.noradId);
