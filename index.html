@@ -187,7 +187,7 @@
             backdrop-filter: blur(10px);
         }
 
-        #controls, #filters-panel, #favorites-panel { 
+        #controls, #filters-panel, #favorites-panel, #donate-panel { 
             position: absolute; 
             top: 20px; 
             right: 20px; 
@@ -549,11 +549,15 @@
             font-size: 22px;
             cursor: pointer;
             color: var(--neon-cyan);
-            padding: 0;
+            padding: 4px 6px;
             line-height: 1;
             transition: transform 0.2s ease;
+            position: relative;
+            z-index: 50;
+            pointer-events: auto !important;
         }
         #panel-fav-btn:hover { transform: scale(1.2); }
+        #panel-fav-btn:active { transform: scale(0.95); }
 
         .sat-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
         .sat-info-row { font-size: 11px; margin-bottom: 8px; display: flex; justify-content: space-between; border-bottom: 1px dotted rgba(128,128,128,0.2); padding-bottom: 5px; color: var(--text-dim); }
@@ -733,7 +737,7 @@
             #status { top: 10px; left: 10px; right: 10px; font-size: 10px; text-align: center; border-radius: 18px; }
             #beta-warning-banner { top: 70px; left: 10px; right: 10px; max-width: none; }
             
-            #controls, #filters-panel, #favorites-panel { 
+            #controls, #filters-panel, #favorites-panel, #donate-panel { 
                 top: auto; 
                 bottom: -100%; 
                 right: 0; 
@@ -744,7 +748,7 @@
                 transition: bottom 0.3s cubic-bezier(0.1, 0.9, 0.2, 1); 
                 z-index: 3600; 
             }
-            #controls.mobile-open, #filters-panel.mobile-open, #favorites-panel.mobile-open { bottom: 0; display: block !important; }
+            #controls.mobile-open, #filters-panel.mobile-open, #favorites-panel.mobile-open, #donate-panel.mobile-open { bottom: 0; display: block !important; }
 
             #sat-info-panel {
                 bottom: -100%;
@@ -1059,7 +1063,7 @@
 
     <!-- Beta Version Overheating / Instability Warning Banner -->
     <div id="beta-warning-banner">
-        <h4>âš ï¸ BETA BUILD WARNING</h4>
+        <h4>⚠️ BETA BUILD WARNING</h4>
         <p>This is a <strong>beta version</strong>. Intense tracking loops or extended runtime may cause your device to overheat, and certain secondary features might temporarily break.</p>
         <button class="beta-dismiss-btn" id="dismiss-beta-banner">UNDERSTOOD</button>
     </div>
@@ -1096,6 +1100,9 @@
         <button class="menu-toggle-btn" id="settings-toggle-btn" title="Map Theme & Passes">
             <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.04.64.09.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
         </button>
+        <button class="menu-toggle-btn" id="donate-toggle-btn" title="Donate">
+            <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+        </button>
         <button class="menu-toggle-btn" id="ar-toggle-btn" title="AR Sky View">
             <svg viewBox="0 0 24 24"><path d="M4 4h4V2H2v6h2V4zm16 0v4h2V2h-6v2h4zM4 20v-4H2v6h6v-2H4zm16 0h-4v2h6v-6h-2v4zM12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
         </button>
@@ -1111,8 +1118,8 @@
             <div class="ar-crosshair-tick ar-tick-right"></div>
         </div>
 
-        <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">â€¹</span><span class="ar-edge-count">0</span></div>
-        <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">â€º</span></div>
+        <div id="ar-edge-left" class="ar-edge-indicator ar-edge-left"><span class="ar-edge-arrow">‹</span><span class="ar-edge-count">0</span></div>
+        <div id="ar-edge-right" class="ar-edge-indicator ar-edge-right"><span class="ar-edge-count">0</span><span class="ar-edge-arrow">›</span></div>
 
         <div id="ar-sat-info-card" role="status">
             <button id="ar-sat-info-close" aria-label="Close satellite details">×</button>
@@ -1123,10 +1130,10 @@
         <div id="ar-hud">
             <div id="ar-status-container">
                 <div id="ar-status-text">INITIALIZING AR TELEMETRY...</div>
-                <div id="ar-compass-readout">HDG --- Â°</div>
-                <button id="ar-toggle-panel-btn">âš™ HIDE RANGE CONTROL</button>
+                <div id="ar-compass-readout">HDG --- °</div>
+                <button id="ar-toggle-panel-btn">⚙️ HIDE RANGE CONTROL</button>
             </div>
-            <button id="ar-close-btn">âœ•</button>
+            <button id="ar-close-btn">×</button>
         </div>
 
         <div id="ar-calibration">
@@ -1140,12 +1147,12 @@
             <div class="ar-range-slider-container">
                 <div class="ar-range-info">
                     <span>COMPASS CALIBRATION</span>
-                    <span id="ar-calibration-val-display">0Â°</span>
+                    <span id="ar-calibration-val-display">0°</span>
                 </div>
                 <div class="ar-calibration-btn-row">
-                    <button id="ar-calibrate-minus" class="ar-calibrate-btn">âˆ’ 5Â°</button>
+                    <button id="ar-calibrate-minus" class="ar-calibrate-btn">− 5°</button>
                     <button id="ar-calibrate-reset" class="ar-calibrate-btn">RESET</button>
-                    <button id="ar-calibrate-plus" class="ar-calibrate-btn">+ 5Â°</button>
+                    <button id="ar-calibrate-plus" class="ar-calibrate-btn">+ 5°</button>
                 </div>
             </div>
         </div>
@@ -1154,7 +1161,7 @@
     <div id="sat-info-panel">
         <div class="sat-info-header">
             <h3 id="panel-sat-name">TELEMETRY DATA FEED</h3>
-            <button id="panel-fav-btn" title="Toggle Favorite">â˜†</button>
+            <button id="panel-fav-btn" title="Toggle Favorite">☆</button>
         </div>
         <div class="sat-info-grid">
             <div>
@@ -1178,12 +1185,65 @@
     <div id="favorites-panel">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; margin-bottom: 14px;">
             <h3 style="margin: 0; font-size: 15px; letter-spacing: 1px; color: var(--text-main);">FAVORITE SATELLITES</h3>
-            <button id="close-favorites-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold;">âœ•</button>
+            <button id="close-favorites-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold;">×</button>
         </div>
         <div id="favorites-list-container">
             <p style="color: var(--text-dim); text-align: center; margin: 20px 0;">No favorite satellites saved yet.</p>
         </div>
     </div>
+
+    <!-- Donate Panel -->
+    <div id="donate-panel">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(128, 128, 128, 0.2); padding-bottom: 10px; margin-bottom: 14px;">
+            <h3 style="margin: 0; font-size: 15px; letter-spacing: 1px; color: var(--text-main);">SUPPORT SATLITE</h3>
+            <button id="close-donate-panel" style="background: var(--neon-pink); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; font-weight: bold; line-height: 24px;">×</button>
+        </div>
+
+        <p style="font-size: 11px; color: var(--text-dim); line-height: 1.5; margin: 0 0 14px 0; text-align: center;">
+            This tracker is free. Donations help keep it online and fund new features.
+        </p>
+
+        <!-- Progress -->
+        <div id="donation-progress-wrap" style="margin-bottom: 16px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 6px; font-size: 11px;">
+                <span style="color: var(--neon-cyan); font-weight: bold; letter-spacing: 0.5px;">GOAL PROGRESS</span>
+                <span id="donation-progress-label" style="color: var(--text-main); font-weight: bold;">$0 / $50</span>
+            </div>
+            <div style="width:100%; height: 12px; background: rgba(128,128,128,0.15); border-radius: 99px; overflow: hidden; border: 1px solid rgba(128,128,128,0.25);">
+                <div id="donation-progress-bar" style="height:100%; width: 0%; background: var(--gradient-primary); border-radius: 99px; transition: width 0.6s ease; box-shadow: 0 0 12px var(--neon-cyan-glow);"></div>
+            </div>
+            <p id="donation-progress-sub" style="font-size: 9px; color: var(--text-dim); margin: 6px 0 0 0; text-align: center;">0% funded — every bit helps</p>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- Amount selection -->
+        <div style="font-size: 10px; color: var(--neon-cyan); font-weight: bold; letter-spacing: 0.5px; margin-bottom: 8px;">CHOOSE AMOUNT</div>
+        <div id="donate-amount-btns" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px;">
+            <button type="button" class="donate-amt-btn" data-amount="3" style="background: rgba(128,128,128,0.1); border: 1px solid rgba(128,128,128,0.3); color: var(--text-main); border-radius: 10px; padding: 10px 4px; font-family: monospace; font-size: 12px; font-weight: bold; cursor: pointer;">$3</button>
+            <button type="button" class="donate-amt-btn" data-amount="5" style="background: rgba(128,128,128,0.1); border: 1px solid rgba(128,128,128,0.3); color: var(--text-main); border-radius: 10px; padding: 10px 4px; font-family: monospace; font-size: 12px; font-weight: bold; cursor: pointer;">$5</button>
+            <button type="button" class="donate-amt-btn active-amt" data-amount="10" style="background: var(--gradient-primary); border: none; color: #fff; border-radius: 10px; padding: 10px 4px; font-family: monospace; font-size: 12px; font-weight: bold; cursor: pointer;">$10</button>
+            <button type="button" class="donate-amt-btn" data-amount="25" style="background: rgba(128,128,128,0.1); border: 1px solid rgba(128,128,128,0.3); color: var(--text-main); border-radius: 10px; padding: 10px 4px; font-family: monospace; font-size: 12px; font-weight: bold; cursor: pointer;">$25</button>
+        </div>
+
+        <div style="margin-bottom: 14px;">
+            <div style="display:flex; justify-content:space-between; font-size: 10px; color: var(--text-dim); margin-bottom: 4px;">
+                <span>Custom</span>
+                <span id="donate-slider-label" style="color: var(--text-main); font-weight: bold;">$10</span>
+            </div>
+            <input id="donate-amount-slider" type="range" min="1" max="100" value="10" step="1" style="width: 100%; accent-color: var(--neon-cyan); cursor: pointer;">
+        </div>
+
+        <!-- PayPal only -->
+        <button id="donate-paypal-btn" class="action-btn" style="display:block; width:100%; text-align:center; border:none; margin-bottom: 8px; background: linear-gradient(135deg, #0070ba 0%, #1546a0 100%);">
+            💳 DONATE $10 WITH PAYPAL
+        </button>
+
+        <p style="font-size: 9px; color: var(--text-dim); text-align: center; margin: 8px 0 0 0; line-height: 1.4;">
+            You will be redirected to PayPal to complete the donation securely.
+        </p>
+    </div>
+
 
     <div id="notif-modal">
         <div class="modal-content">
@@ -1240,8 +1300,8 @@
 
         <div class="range-slider-group">
             <div class="range-slider-label">
-                <span>Inclination Range (Â°)</span>
-                <span id="incl-val-display">0Â° - 180Â°</span>
+                <span>Inclination Range (°)</span>
+                <span id="incl-val-display">0° - 180°</span>
             </div>
             <div class="range-slider-wrapper">
                 <input type="range" id="min-incl-slider" min="0" max="180" value="0" step="1">
@@ -1268,6 +1328,7 @@
         <div class="settings-tabs">
             <button class="settings-tab-btn active" data-tab="tab-general">GENERAL</button>
             <button class="settings-tab-btn" data-tab="tab-colors">COLORS</button>
+            <button class="settings-tab-btn" data-tab="tab-info">INFO</button>
         </div>
 
         <div id="tab-general" class="settings-tab-content active">
@@ -1392,6 +1453,29 @@
             <button id="sync-satellites-btn" class="action-btn" style="margin-top:10px;">SYNC SATELLITES TO UI</button>
             <button id="reset-colors-btn" class="action-btn" style="margin-top:10px; background: rgba(128,128,128,0.15); color: var(--text-main);">RESET ALL COLORS</button>
         </div>
+
+        <div id="tab-info" class="settings-tab-content">
+            <div style="font-size: 10px; color: var(--text-dim); letter-spacing: 0.5px; margin-bottom: 12px;">RELEASE — August 8, 2026</div>
+
+            <div style="font-size: 11px; font-weight: bold; color: var(--neon-cyan); letter-spacing: 0.5px; margin-bottom: 8px;">✅ ADDED</div>
+            <ul id="info-added-list" style="margin: 0 0 16px 0; padding-left: 18px; color: var(--text-main); font-size: 11px; line-height: 1.6;">
+                <li>Real-time satellite map tracking</li>
+                <li>Favorites system with star button</li>
+                <li>Custom themes & color picker</li>
+                <li>Advanced filters (altitude, velocity, inclination)</li>
+                <li>Donation panel with PayPal + progress goal</li>
+                <li>Mobile-friendly panels</li>
+            </ul>
+
+            <div style="font-size: 11px; font-weight: bold; color: var(--neon-cyan); letter-spacing: 0.5px; margin-bottom: 8px;">🛠️ TO BE ADDED</div>
+            <ul id="info-todo-list" style="margin: 0 0 8px 0; padding-left: 18px; color: var(--text-dim); font-size: 11px; line-height: 1.6;">
+                <li>AR sky view</li>
+                <li>More satellite categories / live TLE updates</li>
+                <li>Pass countdown notifications polish</li>
+                <li>Share satellite location link</li>
+                <li>Offline / installable app (PWA)</li>
+            </ul>
+        </div>
     </div>
     
     <div id="map"></div>
@@ -1399,9 +1483,20 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Surfaces any uncaught script error directly on-screen. On a phone there's
-        // no easy console access, so a silent error elsewhere in this file could
-        // otherwise break later features (like favorites) with zero visible sign.
+
+        const _memStore = {};
+        const storage = {
+            getItem(key) {
+                try { return window.localStorage.getItem(key); } catch(e) { return _memStore[key] || null; }
+            },
+            setItem(key, val) {
+                try { window.localStorage.setItem(key, val); } catch(e) { _memStore[key] = String(val); }
+            },
+            removeItem(key) {
+                try { window.localStorage.removeItem(key); } catch(e) { delete _memStore[key]; }
+            }
+        };
+
         window.addEventListener('error', function(event) {
             console.error('Uncaught error:', event.error || event.message, 'at line', event.lineno);
             let banner = document.getElementById('__global-error-banner');
@@ -1421,25 +1516,25 @@
             const rejectBtn = document.getElementById('cookie-reject-btn');
             const dismissBeta = document.getElementById('dismiss-beta-banner');
 
-            if (!localStorage.getItem('sat_beta_warned')) {
+            if (!storage.getItem('sat_beta_warned')) {
                 setTimeout(() => { betaBanner.style.display = 'block'; }, 500);
             }
             dismissBeta.addEventListener('click', () => {
-                localStorage.setItem('sat_beta_warned', 'true');
+                storage.setItem('sat_beta_warned', 'true');
                 betaBanner.style.display = 'none';
             });
 
-            if (!localStorage.getItem('sat_cookie_consent')) {
+            if (!storage.getItem('sat_cookie_consent')) {
                 setTimeout(() => { cookieBanner.style.display = 'block'; }, 1000);
             }
 
             acceptBtn.addEventListener('click', () => {
-                localStorage.setItem('sat_cookie_consent', 'accepted');
+                storage.setItem('sat_cookie_consent', 'accepted');
                 cookieBanner.style.display = 'none';
             });
 
             rejectBtn.addEventListener('click', () => {
-                localStorage.setItem('sat_cookie_consent', 'rejected');
+                storage.setItem('sat_cookie_consent', 'rejected');
                 cookieBanner.style.display = 'none';
             });
         })();
@@ -1475,8 +1570,6 @@
             }, 60);
         })();
 
-        // Repair labels in older copies of this page that were saved through a
-        // legacy Windows text encoding. Escapes keep this fix encoding-safe too.
         (function repairDisplayText() {
             const replacements = new Map([
                 ['\u00e2\u0161\u00a0\u00ef\u00b8\u008f', '\u26a0\ufe0f'],
@@ -1501,8 +1594,8 @@
 
         const isMobileDevice = /Mobi|Android|iPhone/i.test(navigator.userAgent) || (window.innerWidth <= 768);
         const arToggleBtn = document.getElementById('ar-toggle-btn');
-        if (!isMobileDevice) {
-            if (arToggleBtn) arToggleBtn.style.display = 'none';
+        if (arToggleBtn) {
+            arToggleBtn.style.display = 'none';
         }
 
         const canvasRenderer = L.canvas({ padding: 0.5 });
@@ -1525,7 +1618,7 @@
             light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { maxZoom: 18, minZoom: 2, noWrap: false, renderer: canvasRenderer })
         };
 
-        const savedTheme = localStorage.getItem('sat_selected_theme') || 'dark';
+        const savedTheme = storage.getItem('sat_selected_theme') || 'dark';
         document.getElementById('theme-select').value = savedTheme;
         if (savedTheme === 'light') {
             document.body.classList.add('light-theme');
@@ -1535,7 +1628,7 @@
 
         document.getElementById('theme-select').addEventListener('change', (e) => {
             const selectedTheme = e.target.value;
-            localStorage.setItem('sat_selected_theme', selectedTheme);
+            storage.setItem('sat_selected_theme', selectedTheme);
             
             if (selectedTheme === 'light') {
                 document.body.classList.add('light-theme');
@@ -1594,12 +1687,12 @@
             saveCustomColors();
         }
 
-        let currentPerfMode = localStorage.getItem('sat_perf_mode') || 'normal';
+        let currentPerfMode = storage.getItem('sat_perf_mode') || 'normal';
         document.getElementById('perf-mode-select').value = currentPerfMode;
 
         document.getElementById('perf-mode-select').addEventListener('change', (e) => {
             currentPerfMode = e.target.value;
-            localStorage.setItem('sat_perf_mode', currentPerfMode);
+            storage.setItem('sat_perf_mode', currentPerfMode);
             statusDiv.innerText = `PERFORMANCE MODE SET TO: ${currentPerfMode.toUpperCase()}`;
             
             if (currentPerfMode === 'high') {
@@ -1621,8 +1714,36 @@
         let userLocation = { lat: 0, lng: 0, alt: 0 };
         let userLocationMarker = null;
         let userRangeCircle = null;
+        let favoriteNoradIds = [];
+        try {
+            const saved = storage.getItem('sat_favorites');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (Array.isArray(parsed)) favoriteNoradIds = parsed.map(String);
+            }
+        } catch (e) {
+            favoriteNoradIds = [];
+        }
 
-        let favoriteNoradIds = JSON.parse(localStorage.getItem('sat_favorites')) || [];
+        function saveFavorites() {
+            storage.setItem('sat_favorites', JSON.stringify(favoriteNoradIds));
+        }
+
+        function isFavorite(noradId) {
+            return favoriteNoradIds.includes(String(noradId));
+        }
+
+        function toggleFavorite(noradId) {
+            noradId = String(noradId);
+            const idx = favoriteNoradIds.indexOf(noradId);
+            if (idx > -1) {
+                favoriteNoradIds.splice(idx, 1);
+                return false;
+            } else {
+                favoriteNoradIds.push(noradId);
+                return true;
+            }
+        }
 
         const defaultCustomColors = {
             colorThemeValue: 'default',
@@ -1638,11 +1759,11 @@
             }
         };
 
-        let savedCustomThemes = JSON.parse(localStorage.getItem('sat_saved_custom_themes')) || {
+        let savedCustomThemes = JSON.parse(storage.getItem('sat_saved_custom_themes')) || {
             'Default Theme': defaultCustomColors
         };
 
-        let activeCustomThemeName = localStorage.getItem('sat_active_custom_theme') || Object.keys(savedCustomThemes)[0];
+        let activeCustomThemeName = storage.getItem('sat_active_custom_theme') || Object.keys(savedCustomThemes)[0];
         if (!savedCustomThemes[activeCustomThemeName]) {
             activeCustomThemeName = Object.keys(savedCustomThemes)[0];
         }
@@ -1651,8 +1772,8 @@
 
         function saveCustomColors() {
             savedCustomThemes[activeCustomThemeName] = JSON.parse(JSON.stringify(customColors));
-            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
-            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+            storage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            storage.setItem('sat_active_custom_theme', activeCustomThemeName);
         }
 
         function updateSavedThemesDropdown() {
@@ -1717,7 +1838,7 @@
             });
         }
 
-        const initialColorThemeValue = customColors.colorThemeValue || localStorage.getItem('sat_color_theme') || 'default';
+        const initialColorThemeValue = customColors.colorThemeValue || storage.getItem('sat_color_theme') || 'default';
         document.getElementById('color-theme-select').value = initialColorThemeValue;
         applyColorThemeBodyClass(initialColorThemeValue);
         initColorPickers();
@@ -1725,7 +1846,7 @@
 
         document.getElementById('color-theme-select').addEventListener('change', (e) => {
             const selectedColorTheme = e.target.value;
-            localStorage.setItem('sat_color_theme', selectedColorTheme);
+            storage.setItem('sat_color_theme', selectedColorTheme);
             applyColorTheme(selectedColorTheme);
         });
 
@@ -1733,7 +1854,7 @@
             const value = themeValue || 'default';
             applyColorThemeBodyClass(value);
             document.getElementById('color-theme-select').value = value;
-            localStorage.setItem('sat_color_theme', value);
+            storage.setItem('sat_color_theme', value);
         }
 
         document.getElementById('saved-custom-themes-select').addEventListener('change', (e) => {
@@ -1741,7 +1862,7 @@
             if (savedCustomThemes[selectedName]) {
                 activeCustomThemeName = selectedName;
                 customColors = JSON.parse(JSON.stringify(savedCustomThemes[selectedName]));
-                localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+                storage.setItem('sat_active_custom_theme', activeCustomThemeName);
                 restoreThemeSkin(customColors.colorThemeValue);
                 initColorPickers();
                 ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
@@ -1763,8 +1884,8 @@
                 delete savedCustomThemes['Default Theme'];
             }
 
-            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
-            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+            storage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            storage.setItem('sat_active_custom_theme', activeCustomThemeName);
             updateSavedThemesDropdown();
             nameInput.value = '';
             statusDiv.innerText = `SAVED THEME: ${activeCustomThemeName.toUpperCase()}`;
@@ -1779,8 +1900,8 @@
             delete savedCustomThemes[activeCustomThemeName];
             activeCustomThemeName = Object.keys(savedCustomThemes)[0];
             customColors = JSON.parse(JSON.stringify(savedCustomThemes[activeCustomThemeName]));
-            localStorage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
-            localStorage.setItem('sat_active_custom_theme', activeCustomThemeName);
+            storage.setItem('sat_saved_custom_themes', JSON.stringify(savedCustomThemes));
+            storage.setItem('sat_active_custom_theme', activeCustomThemeName);
             updateSavedThemesDropdown();
             restoreThemeSkin(customColors.colorThemeValue);
             initColorPickers();
@@ -1833,23 +1954,24 @@
         document.getElementById('sync-satellites-btn').addEventListener('click', () => {
             const primary = document.getElementById('color-ui-primary').value;
             const secondary = document.getElementById('color-ui-secondary').value;
-            
-            customColors.satellites.stations = primary;
+
             customColors.satellites.starlink = primary;
-            customColors.satellites.weather = secondary;
-            customColors.satellites.visual = secondary;
-            customColors.satellites.active = primary;
+            customColors.satellites.active = secondary;
+            customColors.satellites.stations = '#ffffff';
 
             initColorPickers();
-            ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => updateSatelliteTypeColors(type));
+            ['stations', 'starlink', 'active'].forEach(type => updateSatelliteTypeColors(type));
             saveCustomColors();
             statusDiv.innerText = "SATELLITES SYNCHRONIZED WITH UI COLORS";
         });
 
         document.getElementById('reset-colors-btn').addEventListener('click', () => {
             customColors = JSON.parse(JSON.stringify(defaultCustomColors));
+            activeCustomThemeName = 'Default Theme';
+            savedCustomThemes['Default Theme'] = JSON.parse(JSON.stringify(defaultCustomColors));
             restoreThemeSkin('default');
             saveCustomColors();
+            updateSavedThemesDropdown();
             initColorPickers();
             ['stations', 'starlink', 'weather', 'visual', 'active'].forEach(type => {
                 updateSatelliteTypeColors(type);
@@ -1900,7 +2022,7 @@
         let sliderMinIncl = 0, sliderMaxIncl = 180;
         let sliderMinVel = 0, sliderMaxVel = 15;
 
-        const savedFilters = localStorage.getItem('sat_advanced_filters');
+        const savedFilters = storage.getItem('sat_advanced_filters');
         if (savedFilters) {
             try {
                 const parsed = JSON.parse(savedFilters);
@@ -1940,7 +2062,7 @@
         }
 
         setupDualSlider('min-alt-slider', 'max-alt-slider', 'alt-val-display', 'km');
-        setupDualSlider('min-incl-slider', 'max-incl-slider', 'incl-val-display', 'Â°');
+        setupDualSlider('min-incl-slider', 'max-incl-slider', 'incl-val-display', '°');
         setupDualSlider('min-vel-slider', 'max-vel-slider', 'vel-val-display', 'km/s');
 
         document.getElementById('apply-sliders-btn').addEventListener('click', () => {
@@ -1957,7 +2079,7 @@
 
             advancedFiltersActive = true;
             
-            localStorage.setItem('sat_advanced_filters', JSON.stringify({
+            storage.setItem('sat_advanced_filters', JSON.stringify({
                 minAlt: sliderMinAlt, maxAlt: sliderMaxAlt,
                 minIncl: sliderMinIncl, maxIncl: sliderMaxIncl,
                 minVel: sliderMinVel, maxVel: sliderMaxVel,
@@ -1976,23 +2098,148 @@
             document.getElementById('max-vel-slider').value = 15;
 
             document.getElementById('alt-val-display').innerText = '0 - 40000 km';
-            document.getElementById('incl-val-display').innerText = '0Â° - 180Â°';
+            document.getElementById('incl-val-display').innerText = '0° - 180°';
             document.getElementById('vel-val-display').innerText = '0 - 15 km/s';
 
             advancedFiltersActive = false;
-            localStorage.removeItem('sat_advanced_filters');
+            storage.removeItem('sat_advanced_filters');
             statusDiv.innerText = "FILTERS RESET TO DEFAULT";
         });
 
         const filtersToggleBtn = document.getElementById('filters-toggle-btn');
         const settingsToggleBtn = document.getElementById('settings-toggle-btn');
         const favoritesToggleBtn = document.getElementById('favorites-toggle-btn');
+
+        
+        const DONATION_RAISED = 0;
+        const DONATION_GOAL   = 50;
+        const DONATION_CURRENCY = '$';
+        const PAYPAL_ME_USERNAME = 'YOUR_USERNAME';
+
+        let selectedDonateAmount = 10;
+
+        function updateDonationProgress() {
+            const bar   = document.getElementById('donation-progress-bar');
+            const label = document.getElementById('donation-progress-label');
+            const sub   = document.getElementById('donation-progress-sub');
+            if (!bar || !label) return;
+
+            const step = 50;
+            const baseGoal = DONATION_GOAL;
+            let effectiveGoal = baseGoal;
+            if (DONATION_RAISED >= baseGoal) {
+                effectiveGoal = Math.ceil((DONATION_RAISED + 0.01) / step) * step;
+                if (effectiveGoal <= DONATION_RAISED) effectiveGoal = DONATION_RAISED + step;
+            }
+
+            const pct = Math.max(0, Math.min(100, (DONATION_RAISED / effectiveGoal) * 100));
+            bar.style.width = pct.toFixed(1) + '%';
+            label.innerText = DONATION_CURRENCY + DONATION_RAISED + ' / ' + DONATION_CURRENCY + effectiveGoal;
+            if (sub) {
+                if (DONATION_RAISED >= effectiveGoal) sub.innerText = 'Goal reached — next goal unlocked!';
+                else sub.innerText = Math.round(pct) + '% funded — next goal ' + DONATION_CURRENCY + effectiveGoal;
+            }
+        }
+
+        function setDonateAmount(amount) {
+            selectedDonateAmount = Math.max(1, Math.round(Number(amount) || 1));
+            const slider = document.getElementById('donate-amount-slider');
+            const sliderLabel = document.getElementById('donate-slider-label');
+            const paypalBtn = document.getElementById('donate-paypal-btn');
+            if (slider) slider.value = selectedDonateAmount;
+            if (sliderLabel) sliderLabel.innerText = DONATION_CURRENCY + selectedDonateAmount;
+            if (paypalBtn) paypalBtn.innerText = '💳 DONATE ' + DONATION_CURRENCY + selectedDonateAmount + ' WITH PAYPAL';
+
+            document.querySelectorAll('.donate-amt-btn').forEach(btn => {
+                const isActive = Number(btn.getAttribute('data-amount')) === selectedDonateAmount;
+                if (isActive) {
+                    btn.style.background = 'var(--gradient-primary)';
+                    btn.style.border = 'none';
+                    btn.style.color = '#ffffff';
+                    btn.classList.add('active-amt');
+                } else {
+                    btn.style.background = 'rgba(128,128,128,0.1)';
+                    btn.style.border = '1px solid rgba(128,128,128,0.3)';
+                    btn.style.color = 'var(--text-main)';
+                    btn.classList.remove('active-amt');
+                }
+            });
+        }
+
+        function initDonateUI() {
+            updateDonationProgress();
+            setDonateAmount(10);
+
+            document.querySelectorAll('.donate-amt-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    setDonateAmount(btn.getAttribute('data-amount'));
+                });
+            });
+
+            const slider = document.getElementById('donate-amount-slider');
+            if (slider) {
+                slider.addEventListener('input', () => setDonateAmount(slider.value));
+            }
+
+            const paypalBtn = document.getElementById('donate-paypal-btn');
+            if (paypalBtn) {
+                paypalBtn.addEventListener('click', () => {
+                    if (!PAYPAL_ME_USERNAME || PAYPAL_ME_USERNAME === 'YOUR_USERNAME') {
+                        alert('Set your PayPal.me username in the code first (PAYPAL_ME_USERNAME).');
+                        return;
+                    }
+                    const url = 'https://paypal.me/' + encodeURIComponent(PAYPAL_ME_USERNAME) + '/' + selectedDonateAmount;
+                    window.open(url, '_blank', 'noopener');
+                });
+            }
+        }
+        initDonateUI();
+
+        const donatePanel = document.getElementById('donate-panel');
+        const donateToggleBtn = document.getElementById('donate-toggle-btn');
+        const closeDonatePanel = document.getElementById('close-donate-panel');
+
+        if (donateToggleBtn) {
+            donateToggleBtn.addEventListener('click', () => {
+                const isDesktop = window.innerWidth > 768;
+                const isOpen = isDesktop ? donatePanel.style.display === 'block' : donatePanel.classList.contains('mobile-open');
+                closeAllPanels();
+                if (satInfoPanel) {
+                    satInfoPanel.classList.remove('panel-open');
+                    satInfoPanel.style.display = 'none';
+                }
+                if (!isOpen) {
+                    if (isDesktop) {
+                        donatePanel.style.display = 'block';
+                    } else {
+                        donatePanel.classList.add('mobile-open');
+                        donatePanel.style.display = 'block';
+                    }
+                }
+                updateFloatingButtonsVisibility();
+            });
+        }
+        if (closeDonatePanel) {
+            closeDonatePanel.addEventListener('click', () => {
+                donatePanel.style.display = 'none';
+                donatePanel.classList.remove('mobile-open');
+                updateFloatingButtonsVisibility();
+            });
+        }
+
         const filtersPanel = document.getElementById('filters-panel');
         const controlsPanel = document.getElementById('controls');
         const favoritesPanel = document.getElementById('favorites-panel');
         const closeFavoritesPanel = document.getElementById('close-favorites-panel');
         const floatingBtnsContainer = document.getElementById('floating-btns-container');
         const satInfoPanel = document.getElementById('sat-info-panel');
+        if (satInfoPanel) {
+            ['click', 'mousedown', 'touchstart', 'touchend'].forEach(function(evt) {
+                satInfoPanel.addEventListener(evt, function(e) {
+                    e.stopPropagation();
+                }, true);
+            });
+        }
 
         function updateFloatingButtonsVisibility() {
             const isFiltersOpen = filtersPanel.style.display === 'block' || filtersPanel.classList.contains('mobile-open');
@@ -2011,6 +2258,10 @@
             filtersPanel.style.display = 'none';
             controlsPanel.style.display = 'none';
             favoritesPanel.style.display = 'none';
+            if (typeof donatePanel !== 'undefined' && donatePanel) {
+                donatePanel.style.display = 'none';
+                donatePanel.classList.remove('mobile-open');
+            }
             filtersPanel.classList.remove('mobile-open');
             controlsPanel.classList.remove('mobile-open');
             favoritesPanel.classList.remove('mobile-open');
@@ -2081,85 +2332,116 @@
 
         function updateFavoriteButtonState(tracker) {
             const favBtn = document.getElementById('panel-fav-btn');
-            if (!favBtn) return;
-            if (favoriteNoradIds.includes(tracker.noradId)) {
-                favBtn.innerText = 'â˜…';
+            if (!favBtn || !tracker) return;
+            if (isFavorite(tracker.noradId)) {
+                favBtn.innerText = '★';
                 favBtn.style.color = 'var(--neon-cyan)';
             } else {
-                favBtn.innerText = 'â˜†';
+                favBtn.innerText = '☆';
                 favBtn.style.color = 'var(--text-dim)';
             }
         }
 
-        document.getElementById('panel-fav-btn').addEventListener('click', () => {
-            if (!selectedTracker) return;
-            const index = favoriteNoradIds.indexOf(selectedTracker.noradId);
-            if (index > -1) {
-                favoriteNoradIds.splice(index, 1);
-                statusDiv.innerText = `REMOVED FROM FAVORITES: ${selectedTracker.name}`;
-            } else {
-                favoriteNoradIds.push(selectedTracker.noradId);
-                statusDiv.innerText = `ADDED TO FAVORITES: ${selectedTracker.name}`;
+        function handleFavButtonClick(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+
+            const favBtn = document.getElementById('panel-fav-btn');
+            if (!selectedTracker) {
+                if (typeof statusDiv !== 'undefined') statusDiv.innerText = 'NO SATELLITE SELECTED – click a satellite first';
+                return;
             }
-            localStorage.setItem('sat_favorites', JSON.stringify(favoriteNoradIds));
+            if (!selectedTracker.noradId) {
+                if (typeof statusDiv !== 'undefined') statusDiv.innerText = 'ERROR: satellite has no NORAD ID';
+                return;
+            }
+
+            const nowFav = toggleFavorite(selectedTracker.noradId);
+            saveFavorites();
+
+            if (favBtn) {
+                favBtn.innerText = nowFav ? '★' : '☆';
+                favBtn.style.color = nowFav ? 'var(--neon-cyan)' : 'var(--text-dim)';
+            }
             updateFavoriteButtonState(selectedTracker);
             renderFavoritesList();
-        });
+
+            if (typeof statusDiv !== 'undefined') {
+                statusDiv.innerText = (nowFav ? '★ ADDED TO FAVORITES: ' : '☆ REMOVED FROM FAVORITES: ') + selectedTracker.name;
+            }
+        }
+
+        const _favBtnEl = document.getElementById('panel-fav-btn');
+        if (_favBtnEl) {
+            _favBtnEl.onclick = handleFavButtonClick;
+            _favBtnEl.addEventListener('click', handleFavButtonClick, true);
+            _favBtnEl.addEventListener('touchend', handleFavButtonClick, {passive: false});
+        }
+        document.addEventListener('click', function(e) {
+            if (e.target && (e.target.id === 'panel-fav-btn' || e.target.closest('#panel-fav-btn'))) {
+                handleFavButtonClick(e);
+            }
+        }, true);
 
         function renderFavoritesList() {
             const container = document.getElementById('favorites-list-container');
             if (!container) return;
-            
+
             if (favoriteNoradIds.length === 0) {
                 container.innerHTML = '<p style="color: var(--text-dim); text-align: center; margin: 20px 0;">No favorite satellites saved yet.</p>';
                 return;
             }
 
             container.innerHTML = '';
-            favoriteNoradIds.forEach(noradId => {
-                const tracker = allTrackers.find(t => t.noradId === noradId);
-                const satName = tracker ? tracker.name : `NORAD ID: ${noradId}`;
-                const satType = tracker ? tracker.specificType.toUpperCase() : 'ORBITAL';
-                
+            favoriteNoradIds.forEach(function(noradId) {
+                noradId = String(noradId);
+                const tracker = allTrackers.find(function(t) { return String(t.noradId) === noradId; });
+                const satName = tracker ? tracker.name : ('NORAD ID: ' + noradId);
+                const satType = tracker ? String(tracker.specificType || 'orbital').toUpperCase() : 'ORBITAL';
+
                 const item = document.createElement('div');
-                item.style.cssText = "display: flex; justify-content: space-between; align-items: center; background: rgba(128,128,128,0.08); padding: 10px 12px; border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(128,128,128,0.2);";
-                item.innerHTML = `
-                    <div>
-                        <div style="font-weight: bold; color: var(--text-main); font-size: 11px;">${satName}</div>
-                        <div style="font-size: 9px; color: var(--text-dim);">NORAD: ${noradId} | ${satType}</div>
-                    </div>
-                    <div style="display: flex; gap: 6px;">
-                        <button class="fav-track-btn" data-norad="${noradId}" style="background: var(--gradient-primary); color: #fff; border: none; padding: 6px 10px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer; font-weight: bold;">VIEW</button>
-                        <button class="fav-remove-btn" data-norad="${noradId}" style="background: var(--neon-pink); color: #fff; border: none; padding: 6px 8px; border-radius: 8px; font-family: monospace; font-size: 9px; cursor: pointer;">âœ•</button>
-                    </div>
-                `;
+                item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:rgba(128,128,128,0.08);padding:10px 12px;border-radius:12px;margin-bottom:8px;border:1px solid rgba(128,128,128,0.2);';
+                item.innerHTML =
+                    '<div>' +
+                        '<div style="font-weight:bold;font-size:12px;color:var(--text-main);">' + satName + '</div>' +
+                        '<div style="font-size:9px;color:var(--text-dim);">NORAD: ' + noradId + ' | ' + satType + '</div>' +
+                    '</div>' +
+                    '<div style="display:flex;gap:6px;">' +
+                        '<button class="fav-track-btn" data-norad="' + noradId + '" style="background:var(--gradient-primary);color:#fff;border:none;padding:6px 10px;border-radius:8px;font-family:monospace;font-size:9px;cursor:pointer;font-weight:bold;">VIEW</button>' +
+                        '<button class="fav-remove-btn" data-norad="' + noradId + '" style="background:var(--neon-pink);color:#fff;border:none;padding:6px 8px;border-radius:8px;font-family:monospace;font-size:9px;cursor:pointer;">×</button>' +
+                    '</div>';
                 container.appendChild(item);
             });
 
-            container.querySelectorAll('.fav-track-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-norad');
-                    const tracker = allTrackers.find(t => t.noradId === id);
+            container.querySelectorAll('.fav-track-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    const id = String(e.currentTarget.getAttribute('data-norad'));
+                    const tracker = allTrackers.find(function(t) { return String(t.noradId) === id; });
                     if (tracker) {
                         selectedTracker = tracker;
-                        showTrajectory(tracker);
-                        openSatelliteInfoPanel(tracker);
-                        closeAllPanels();
+                        if (typeof showTrajectory === 'function') showTrajectory(tracker);
+                        if (typeof openSatelliteInfoPanel === 'function') openSatelliteInfoPanel(tracker);
+                        else if (typeof selectSatellite === 'function') selectSatellite(tracker);
+                        if (typeof closeAllPanels === 'function') closeAllPanels();
+                        if (tracker.lat && tracker.lng && typeof map !== 'undefined') {
+                            map.setView([tracker.lat, tracker.lng], 4);
+                        }
                     } else {
-                        statusDiv.innerText = `TARGET NORAD ${id} NOT CURRENTLY LOADED IN ACTIVE CATEGORIES`;
+                        if (typeof statusDiv !== 'undefined') statusDiv.innerText = 'TARGET NORAD ' + id + ' NOT CURRENTLY LOADED';
                     }
                 });
             });
 
-            container.querySelectorAll('.fav-remove-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const id = e.target.getAttribute('data-norad');
+            container.querySelectorAll('.fav-remove-btn').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    const id = String(e.currentTarget.getAttribute('data-norad'));
                     const idx = favoriteNoradIds.indexOf(id);
                     if (idx > -1) {
                         favoriteNoradIds.splice(idx, 1);
-                        localStorage.setItem('sat_favorites', JSON.stringify(favoriteNoradIds));
+                        saveFavorites();
                         renderFavoritesList();
-                        if (selectedTracker && selectedTracker.noradId === id) {
+                        if (selectedTracker && String(selectedTracker.noradId) === id) {
                             updateFavoriteButtonState(selectedTracker);
                         }
                     }
@@ -2406,11 +2688,11 @@
             document.getElementById('panel-sat-name').innerText = tracker.name;
             document.getElementById('panel-norad').innerText = tracker.noradId;
             document.getElementById('panel-type').innerText = tracker.specificType.toUpperCase();
-            document.getElementById('panel-lat').innerText = tracker.lat.toFixed(2) + 'Â°';
-            document.getElementById('panel-lng').innerText = tracker.lng.toFixed(2) + 'Â°';
+            document.getElementById('panel-lat').innerText = tracker.lat.toFixed(2) + '°';
+            document.getElementById('panel-lng').innerText = tracker.lng.toFixed(2) + '°';
             document.getElementById('panel-alt').innerText = tracker.alt.toFixed(1) + ' km';
             document.getElementById('panel-vel').innerText = tracker.vel.toFixed(2) + ' km/s';
-            document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + 'Â°';
+            document.getElementById('panel-incl').innerText = tracker.inclination.toFixed(2) + '°';
             document.getElementById('panel-ecc').innerText = tracker.eccentricity.toFixed(6);
 
             updateFavoriteButtonState(tracker);
@@ -2466,14 +2748,18 @@
         function clearTrajectory() {
             orbitLayers.forEach(layer => map.removeLayer(layer));
             orbitLayers = [];
-            selectedTracker = null;
         }
 
-        // This was completely missing â€” clicking empty map space did nothing,
-        // so there was no way to deselect a satellite or dismiss open panels
-        // except by picking another satellite or re-opening the same panel.
-        map.on('click', () => {
+        map.on('click', (e) => {
+            const t = e.originalEvent && e.originalEvent.target;
+            if (t && (t.closest('#sat-info-panel') || t.closest('#controls') ||
+                      t.closest('#filters-panel') || t.closest('#favorites-panel') ||
+                      t.closest('#panel-fav-btn') || t.id === 'panel-fav-btn' ||
+                      t.closest('.floating-buttons') || t.closest('#status'))) {
+                return;
+            }
             clearTrajectory();
+            selectedTracker = null;
             satInfoPanel.classList.remove('panel-open');
             satInfoPanel.style.display = 'none';
             closeAllPanels();
@@ -2481,35 +2767,24 @@
         });
 
         let arActive = false;
-        // LEO satellites near zenith are ~400-600km away, but near the horizon the
-        // same satellites can be 1500-2000km away due to Earth's curvature. 1500km
-        // as a default meant almost every satellite above the horizon anywhere in
-        // the sky qualified at once — often 50-100+ simultaneously. A more moderate
-        // distance combined with a minimum elevation filter (below) keeps the AR
-        // view to satellites that are actually usefully visible, not everything.
         let arMaxDistanceKm = 800;
-        const AR_MIN_ELEVATION_DEG = 15; // things very near the horizon are usually blocked by buildings/trees anyway
+        const AR_MIN_ELEVATION_DEG = 15;
         let arStream = null;
 
-        // Raw sensor readings vs. smoothed values actually used for rendering â€”
-        // smoothing kills the jitter you'd otherwise see from noisy phone sensors.
         let rawHeading = 0;
         let rawPitch = 0;
         let smoothedHeading = 0;
         let smoothedPitch = 0;
-        let headingCalibrationOffset = parseFloat(localStorage.getItem('sat_ar_calibration')) || 0;
+        let headingCalibrationOffset = parseFloat(storage.getItem('sat_ar_calibration')) || 0;
 
-        // Full-catalog "which satellites are even roughly nearby" scan is expensive
-        // to run every frame, so it only reruns periodically. The small resulting
-        // candidate list then gets precise azimuth/elevation math every frame.
         let arCandidateTrackers = [];
         let arLastCandidateScan = 0;
         const AR_CANDIDATE_RESCAN_MS = 1000;
 
-        const AR_FOV_H = 70; // degrees â€” typical rear camera horizontal FOV
-        const AR_FOV_V = 55; // degrees â€” narrower vertically for a portrait screen
+        const AR_FOV_H = 70;
+        const AR_FOV_V = 55;
 
-        const arMarkerElements = new Map(); // noradId -> DOM element, reused across frames instead of rebuilt
+        const arMarkerElements = new Map();
 
         const arDistanceSlider = document.getElementById('ar-distance-slider');
         const arRangeValDisplay = document.getElementById('ar-range-val-display');
@@ -2518,7 +2793,7 @@
             arMaxDistanceKm = parseInt(e.target.value, 10);
             arRangeValDisplay.innerText = `${arMaxDistanceKm} KM`;
             document.getElementById('ar-status-text').innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
-            arLastCandidateScan = 0; // force an immediate rescan with the new range
+            arLastCandidateScan = 0;
         });
 
         const arCalibrationValDisplay = document.getElementById('ar-calibration-val-display');
@@ -2529,17 +2804,17 @@
 
         document.getElementById('ar-calibrate-minus').addEventListener('click', () => {
             headingCalibrationOffset -= 5;
-            localStorage.setItem('sat_ar_calibration', headingCalibrationOffset);
+            storage.setItem('sat_ar_calibration', headingCalibrationOffset);
             updateCalibrationDisplay();
         });
         document.getElementById('ar-calibrate-plus').addEventListener('click', () => {
             headingCalibrationOffset += 5;
-            localStorage.setItem('sat_ar_calibration', headingCalibrationOffset);
+            storage.setItem('sat_ar_calibration', headingCalibrationOffset);
             updateCalibrationDisplay();
         });
         document.getElementById('ar-calibrate-reset').addEventListener('click', () => {
             headingCalibrationOffset = 0;
-            localStorage.setItem('sat_ar_calibration', 0);
+            storage.setItem('sat_ar_calibration', 0);
             updateCalibrationDisplay();
         });
 
@@ -2548,7 +2823,7 @@
         if (arToggleBtn) {
             arToggleBtn.addEventListener('click', () => {
                 if (!window.isSecureContext) {
-                    alert('AR needs a secure page. Open SatLite through HTTPS or http://localhost â€” it cannot use the camera from a file:// URL.');
+                    alert('AR needs a secure page. Open SatLite through HTTPS or http://localhost — it cannot use the camera from a file:// URL.');
                     return;
                 }
                 if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -2566,9 +2841,6 @@
         document.getElementById('grant-compass-btn').addEventListener('click', async () => {
             compassPermissionModal.style.display = 'none';
 
-            // Start the camera request immediately while this button press is still
-            // a trusted user action. Safari otherwise silently drops the request
-            // after an awaited compass/location permission prompt.
             startARWorkflow();
 
             if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
@@ -2586,18 +2858,12 @@
         function startARWorkflow() {
             const arView = document.getElementById('ar-view');
             const arStatusText = document.getElementById('ar-status-text');
-            // AR is calibrated for portrait. Locking when the browser permits it
-            // prevents a screen rotation from changing the sensor axes mid-session.
             if (screen.orientation && screen.orientation.lock) {
                 screen.orientation.lock('portrait').catch(() => {});
             }
-            // Make feedback visible immediately. Previously the status lived in a
-            // hidden AR view until both location and camera access had succeeded.
             arView.style.display = 'block';
             arStatusText.innerText = `ACQUIRING POSITION FOR ${arMaxDistanceKm}KM AR RANGE...`;
 
-            // Do not wait for location before asking for the camera: mobile Safari
-            // requires this request to happen directly from the Grant button.
             initCameraAndAR();
             
             if (navigator.geolocation) {
@@ -2625,8 +2891,6 @@
             arStatusText.innerText = "ACTIVATING OPTICAL SENSOR...";
 
             try {
-                // "ideal" permits phones/browsers without a named rear camera to
-                // fall back gracefully instead of rejecting the whole AR session.
                 arStream = await navigator.mediaDevices.getUserMedia({
                     video: { facingMode: { ideal: 'environment' } },
                     audio: false
@@ -2638,9 +2902,6 @@
                 arToggleBtn.classList.add('ar-toggle-btn-active');
                 arStatusText.innerText = `AR ACTIVE (${arMaxDistanceKm} KM RANGE LIMIT)`;
 
-                // Prefer the "absolute" orientation event where supported (more reliable
-                // true-north reference on Android); fall back to plain deviceorientation
-                // (which is what iOS Safari provides, using webkitCompassHeading on it).
                 if ('ondeviceorientationabsolute' in window) {
                     window.addEventListener('deviceorientationabsolute', handleOrientation, true);
                 } else {
@@ -2650,35 +2911,24 @@
                 arLastCandidateScan = 0;
                 startARLoop();
             } catch (err) {
-                arStatusText.innerText = 'CAMERA UNAVAILABLE â€” CHECK HTTPS AND PERMISSIONS';
+                arStatusText.innerText = 'CAMERA UNAVAILABLE — CHECK HTTPS AND PERMISSIONS';
                 console.error(err);
             }
         }
 
-        // Simpler, easier-to-verify heading + pitch model instead of a full 3-axis
-        // roll-compensated rotation matrix. The previous version's custom matrix
-        // couldn't be confidently verified correct and matched the reported
-        // "tilted / wrong direction" symptom exactly. This assumes the phone is
-        // held roughly upright, which is how people actually point a phone at
-        // the sky — it won't compensate for the phone being tilted/rolled to the
-        // side, but it will reliably point the right way for normal use.
         function handleOrientation(event) {
             let alpha = event.alpha;
             let beta  = event.beta;
             let gamma = event.gamma;
 
-            // Prefer iOS true-north heading when available
             if (typeof event.webkitCompassHeading === 'number') {
                 deviceHeading = (event.webkitCompassHeading + compassCalibrationOffset + 360) % 360;
             } else if (alpha !== null) {
                 deviceHeading = (alpha + compassCalibrationOffset + 360) % 360;
             }
 
-            // CRITICAL FIX: upright phone (looking at horizon) → pitch = 0
-            // beta ≈ 90 when held vertically → subtract 90
             if (beta !== null) {
                 devicePitch = beta - 90;
-                // Soft clamp to reduce extreme jumps near zenith / nadir
                 devicePitch = Math.max(-90, Math.min(90, devicePitch));
             } else {
                 devicePitch = 0;
@@ -2691,7 +2941,6 @@
 
         function toRadians(degrees) { return degrees * Math.PI / 180; }
 
-        // Circular-safe smoothing so headings don't jump wildly across the 0Â°/360Â° seam.
         function smoothAngle(current, target, factor) {
             let diff = ((target - current + 540) % 360) - 180;
             return (current + diff * factor + 360) % 360;
@@ -2719,8 +2968,6 @@
         const arViewElement = document.getElementById('ar-view');
         const arSatInfoCard = document.getElementById('ar-sat-info-card');
 
-        // Use HTML entities / Unicode escapes here so AR controls remain readable
-        // even if a browser opens this file with a legacy text encoding.
         document.getElementById('ar-close-btn').innerHTML = '&times;';
         document.querySelector('#ar-edge-left .ar-edge-arrow').innerHTML = '&lsaquo;';
         document.querySelector('#ar-edge-right .ar-edge-arrow').innerHTML = '&rsaquo;';
@@ -2729,14 +2976,12 @@
         arTogglePanelBtn.addEventListener('click', () => {
             arCalibrationPanel.classList.toggle('collapsed');
             if (arCalibrationPanel.classList.contains('collapsed')) {
-                arTogglePanelBtn.innerText = 'âš™ SHOW RANGE CONTROL';
+                arTogglePanelBtn.innerText = '⚙️ SHOW RANGE CONTROL';
             } else {
-                arTogglePanelBtn.innerText = 'âš™ HIDE RANGE CONTROL';
+                arTogglePanelBtn.innerText = '⚙️ HIDE RANGE CONTROL';
             }
         });
 
-        // The existing button hides the range panel. Make that state a genuinely
-        // quieter AR mode by also hiding non-essential aiming/HUD decorations.
         arTogglePanelBtn.addEventListener('click', () => {
             const controlsHidden = arCalibrationPanel.classList.contains('collapsed');
             arViewElement.classList.toggle('minimal-ui', controlsHidden);
@@ -2754,10 +2999,6 @@
             arSatInfoCard.classList.add('visible');
         }
 
-        // Periodic coarse scan across the whole loaded catalog to find which satellites
-        // are even roughly within range. This is the only place that touches every
-        // tracked satellite, and it only runs once a second â€” not every frame â€” which is
-        // what makes the AR view fast even with thousands of satellites loaded.
         function rescanARCandidates(now) {
             const gmst = satellite.gstime(now);
             const candidates = [];
@@ -2770,15 +3011,10 @@
                 const lat = satellite.degreesLat(geo.latitude);
                 const lng = satellite.degreesLong(geo.longitude);
 
-                // Cheap flat-earth ground-distance estimate â€” just for this coarse
-                // prefilter. Precise slant-range filtering happens every frame below.
                 const dLatKm = (lat - userLocation.lat) * 111;
                 const dLngKm = (lng - userLocation.lng) * 111 * cosLat;
                 const roughDistKm = Math.sqrt(dLatKm * dLatKm + dLngKm * dLngKm);
 
-                // This is deliberately generous: it only rejects satellites that
-                // cannot possibly be in range. The exact slant-range check runs
-                // below, so horizon satellites are not accidentally skipped.
                 if (roughDistKm < arMaxDistanceKm + geo.height + 200) {
                     candidates.push(tracker);
                 }
@@ -2830,9 +3066,6 @@
                     const pv = satellite.propagate(tracker.satrec, now);
                     if (!pv.position) return;
 
-                    // Real azimuth/elevation via satellite.js â€” accounts for Earth's
-                    // curvature and observer position correctly, unlike a flat-earth
-                    // atan2(altitude, ground_distance) approximation.
                     const positionEcf = satellite.eciToEcf(pv.position, gmst);
                     const look = satellite.ecfToLookAngles(observerGd, positionEcf);
                     const azimuth = satellite.radiansToDegrees(look.azimuth);
@@ -2851,8 +3084,6 @@
 
                     if (!inFov) {
                         removeARMarker(tracker.noradId);
-                        // Only count things roughly at eye level as "off to the side" â€”
-                        // ignore satellites way above/below where a side arrow wouldn't help.
                         if (Math.abs(relElevation) < AR_FOV_V) {
                             if (relAzimuth < 0) offscreenLeftCount++;
                             else offscreenRightCount++;
@@ -2865,7 +3096,6 @@
                     const screenX = (screenWidth / 2) + (relAzimuth / (AR_FOV_H / 2)) * (screenWidth / 2);
                     const screenY = (screenHeight / 2) - (relElevation / (AR_FOV_V / 2)) * (screenHeight / 2);
 
-                    // Closer satellites render bigger and brighter; farther ones shrink and fade.
                     const proximity = Math.max(0, Math.min(1, 1 - (rangeKm / arMaxDistanceKm)));
                     const dotSize = 10 + proximity * 12;
                     const opacity = 0.55 + proximity * 0.45;
@@ -2905,11 +3135,10 @@
                     dot.style.opacity = opacity;
                     dot.style.border = `2px solid ${typeColor}`;
 
-                    markerEl.querySelector('.ar-marker-label').innerText = `${tracker.name} Â· ${tracker.specificType.toUpperCase()}`;
-                    markerEl.querySelector('.ar-marker-distance').innerText = `${rangeKm.toFixed(0)} KM Â· ${elevation.toFixed(0)}Â° ELEV`;
+                    markerEl.querySelector('.ar-marker-label').innerText = `${tracker.name} · ${tracker.specificType.toUpperCase()}`;
+                    markerEl.querySelector('.ar-marker-distance').innerText = `${rangeKm.toFixed(0)} KM · ${elevation.toFixed(0)}° ELEV`;
                 });
 
-                // Clean up markers for anything that dropped out of the candidate list entirely
                 arMarkerElements.forEach((el, id) => {
                     if (!stillVisible.has(id)) {
                         const stillCandidate = arCandidateTrackers.some(t => t.noradId === id);
@@ -3040,9 +3269,6 @@
                                         map.addLayer(tracker.customIconMarker);
                                         tracker.isVisible = true;
                                     } else if (!tracker.isVisible) {
-                                        // A detailed marker may already exist but have
-                                        // been removed while switching zoom levels. Put
-                                        // it back before only updating its position.
                                         tracker.customIconMarker.setLatLng(latLng);
                                         map.addLayer(tracker.customIconMarker);
                                         tracker.isVisible = true;
